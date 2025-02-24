@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Блог о еде</title>
+</head>
+
+<body>
+
+<h1>Блог о еде</h1>
+
+<div>
+    <div th:each="el : ${cart}">
+        <p th:text="${el.id}"></p>
+        <p th:text="${el.quantity}"></p>
+        <p>==></p>
+
+        <p th:text="${el.product.id}"></p>
+        <p th:text="${el.product.name}"></p>
+        <p th:text="${el.product.description}"></p>
+        <p th:text="${el.product.price}"></p>
+        <p th:text="${el.product.imageUrl}"></p>
+        <p th:text="${el.product.stock}"></p>
+        <p>----</p>
+    </div>
+</div>
+
+</body>
+</html>
