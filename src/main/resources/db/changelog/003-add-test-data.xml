@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Добавление тестовых товаров -->
+    <changeSet id="14" author="minlex">
+        <insert tableName="products">
+            <column name="name" value="Smartphone"/>
+            <column name="description" value="A powerful smartphone with a great camera."/>
+            <column name="price" value="699.99"/>
+            <column name="stock" value="100"/>
+            <column name="image_url" value="https://example.com/smartphone.jpg"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="T-Shirt"/>
+            <column name="description" value="A comfortable cotton T-shirt."/>
+            <column name="price" value="19.99"/>
+            <column name="stock" value="200"/>
+            <column name="image_url" value="https://example.com/tshirt.jpg"/>
+        </insert>
+    </changeSet>
+
+    <!-- Добавление тестовых данных в корзину -->
+    <changeSet id="15" author="minlex">
+        <insert tableName="cart">
+            <column name="product_id" value="1"/> <!-- Smartphone -->
+            <column name="quantity" value="2"/>
+        </insert>
+        <insert tableName="cart">
+            <column name="product_id" value="2"/> <!-- T-Shirt -->
+            <column name="quantity" value="1"/>
+        </insert>
+    </changeSet>
+
+    <!-- Добавление тестовых заказов -->
+    <changeSet id="16" author="minlex">
+        <insert tableName="orders">
+            <column name="total_amount" value="1399.98"/>
+            <column name="status" value="Processing"/>
+        </insert>
+        <insert tableName="orders">
+            <column name="total_amount" value="19.99"/>
+            <column name="status" value="Shipped"/>
+        </insert>
+    </changeSet>
+
+    <!-- Добавление тестовых элементов заказа -->
+    <changeSet id="17" author="minlex">
+        <insert tableName="order_items">
+            <column name="order_id" value="1"/> <!-- Order 1 -->
+            <column name="product_id" value="1"/> <!-- Smartphone -->
+            <column name="quantity" value="2"/>
+            <column name="price" value="699.99"/>
+        </insert>
+        <insert tableName="order_items">
+            <column name="order_id" value="2"/> <!-- Order 2 -->
+            <column name="product_id" value="2"/> <!-- T-Shirt -->
+            <column name="quantity" value="1"/>
+            <column name="price" value="19.99"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
