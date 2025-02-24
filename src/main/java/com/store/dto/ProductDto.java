@@ -5,7 +5,7 @@ public record ProductDto(
         String name,
         String description,
         Double price,
-        String image_url,
+        String imageUrl,
         int stock
 ) {
 }

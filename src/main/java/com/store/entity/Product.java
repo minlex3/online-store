@@ -20,19 +20,19 @@ public class Product {
     private Double price;
 
     @Column
-    private String image_url;
+    private String imageUrl;
 
     @Column
     private int stock;
 
     public Product() {}
 
-    public Product(Long id, String name, String description, Double price, String image_url, int stock) {
+    public Product(Long id, String name, String description, Double price, String imageUrl, int stock) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
-        this.image_url = image_url;
+        this.imageUrl = imageUrl;
         this.stock = stock;
     }
 
@@ -68,12 +68,12 @@ public class Product {
         this.price = price;
     }
 
-    public String getImage_url() {
-        return image_url;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImage_url(String image_url) {
-        this.image_url = image_url;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public int getStock() {
