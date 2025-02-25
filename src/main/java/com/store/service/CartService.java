@@ -32,35 +32,48 @@ public class CartService {
     }
 
     public void addToCart(Long productId) {
-        Optional<Cart> cartProduct = cartRepository.findCartByProductId(productId);
-        if (cartProduct.isPresent()) {
-            Cart c = cartProduct.get();
-            c.setQuantity(c.getQuantity() + 1);
-            cartRepository.save(c);
-        } else {
-            Optional<Product> product = productRepository.findById(productId);
-            if (product.isPresent()) {
-                Cart c = new Cart();
-                c.setProduct(product.get());
-                c.setQuantity(1);
-                cartRepository.save(c);
-            }
+        Optional<Product> rawProduct = productRepository.findById(productId);
+        if (rawProduct.isEmpty() || rawProduct.get().getStock() == 0) {
+            return;
         }
+        Product product = rawProduct.get();
+
+        Cart cart;
+        Optional<Cart> cartProduct = cartRepository.findCartByProductId(productId);
+
+        if (cartProduct.isPresent()) {
+            cart = cartProduct.get();
+            cart.setQuantity(cart.getQuantity() + 1);
+        } else {
+            cart = new Cart();
+            cart.setProduct(product);
+            cart.setQuantity(1);
+        }
+
+        product.setStock(product.getStock() - 1);
+        productRepository.save(product);
+
+        cartRepository.save(cart);
     }
 
     public void removeFromCart(Long productId) {
-        Optional<Cart> cartProduct = cartRepository.findCartByProductId(productId);
-        Optional<Product> product = productRepository.findById(productId);
-        if (cartProduct.isPresent()) {
-            Cart c = cartProduct.get();
-            if (c.getQuantity() == 1) {
-                Product p = product.get();
-                p.setCart(null);
-                cartRepository.delete(c);
-            } else {
-                c.setQuantity(c.getQuantity() - 1);
-                cartRepository.save(c);
-            }
+        Optional<Product> rawProduct = productRepository.findById(productId);
+        Optional<Cart> rawCart = cartRepository.findCartByProductId(productId);
+        if (rawProduct.isEmpty() || rawCart.isEmpty()) {
+            return;
         }
+        Product product = rawProduct.get();
+        Cart cart = rawCart.get();
+
+        if (cart.getQuantity() == 1) {
+            product.setCart(null);
+            cartRepository.delete(cart);
+        } else {
+            cart.setQuantity(cart.getQuantity() - 1);
+            cartRepository.save(cart);
+        }
+
+        product.setStock(product.getStock() + 1);
+        productRepository.save(product);
     }
 }

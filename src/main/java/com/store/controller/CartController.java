@@ -1,7 +1,6 @@
 package com.store.controller;
 
 import com.store.dto.CartDto;
-import com.store.entity.Cart;
 import com.store.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Controller
 @RequestMapping("/cart")
@@ -23,42 +21,44 @@ public class CartController {
 
     @GetMapping
     public String findAll(Model model) {
-        List<CartDto> all = cartService.findAll();
-        AtomicReference<Double> total = new AtomicReference<>(0.0);
-        all.forEach(cart -> {
-            total.set(total.get() + cart.quantity() * cart.product().price());
-        });
+        List<CartDto> cartDtoList = cartService.findAll();
 
-        model.addAttribute("cart", all);
-        model.addAttribute("total", total.get());
+        double total = cartDtoList.stream()
+                .mapToDouble(cartDto -> cartDto.quantity() * cartDto.product().price())
+                .sum();
+
+        model.addAttribute("cart", cartDtoList);
+        model.addAttribute("total", total);
         return "cart-list";
     }
 
-    @PostMapping("/add/{id}")
-    public String addToCart(Model model, @PathVariable("id") Long id) {
+    @PostMapping("/add/{id}/{redirect}")
+    public String addToCart(
+            @PathVariable("id") Long id,
+            @PathVariable("redirect") String redirect
+    ) {
         cartService.addToCart(id);
 
-        return "redirect:/products";
+        return switch (redirect) {
+            case "products" -> "redirect:/products";
+            case "product" -> "redirect:/products/" + id;
+            case "cart" -> "redirect:/cart";
+            default -> "redirect:/products";
+        };
     }
 
-    @PostMapping("/remove/{id}")
-    public String removeFromCart(Model model, @PathVariable("id") Long id) {
+    @PostMapping("/remove/{id}/{redirect}")
+    public String removeFromCart(
+            @PathVariable("id") Long id,
+            @PathVariable("redirect") String redirect
+    ) {
         cartService.removeFromCart(id);
 
-        return "redirect:/products";
-    }
-
-    @PostMapping("/add2/{id}")
-    public String addToCart2(Model model, @PathVariable("id") Long id) {
-        cartService.addToCart(id);
-
-        return "redirect:/products/" + id;
-    }
-
-    @PostMapping("/remove2/{id}")
-    public String removeFromCart2(Model model, @PathVariable("id") Long id) {
-        cartService.removeFromCart(id);
-
-        return "redirect:/products/" + id;
+        return switch (redirect) {
+            case "products" -> "redirect:/products";
+            case "product" -> "redirect:/products/" + id;
+            case "cart" -> "redirect:/cart";
+            default -> "redirect:/products";
+        };
     }
 }

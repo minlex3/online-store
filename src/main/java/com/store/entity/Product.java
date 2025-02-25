@@ -2,8 +2,6 @@ package com.store.entity;
 
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "products")
 public class Product {
@@ -30,7 +28,8 @@ public class Product {
     @OneToOne(mappedBy = "product")
     private Cart cart;
 
-    public Product() {}
+    public Product() {
+    }
 
     public Product(Long id, String name, String description, Double price, String imageUrl, int stock, Cart cart) {
         this.id = id;

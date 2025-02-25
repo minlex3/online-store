@@ -4,25 +4,185 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Магазин</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            text-align: center;
+        }
+        a {
+            color: black;
+            padding: 8px 16px;
+            text-decoration: none;
+            align-content: center;
+        }
+        a:hover {
+            background-color: #ddd;
+            border-radius: 5px;
+        }
+        .product-image {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+        .filter {
+            padding: 15px;
+        }
+        .createNewProduct {
+            padding: 15px;
+        }
+        .product {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .button {
+            background-color: #04AA6D; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .button:hover {
+            background-color: #3e8e41;
+        }
+        .form-container {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type=text] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type=submit] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type=submit]:hover {
+            background-color: #45a049;
+        }
+
+        .pagination {
+            display: inline-block;
+        }
+        .pagination a {
+            color: black;
+            float: left;
+            padding: 8px 16px;
+            text-decoration: none;
+        }
+        .pagination a.active {
+              background-color: #4CAF50;
+              color: white;
+              border-radius: 5px;
+        }
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+            border-radius: 5px;
+        }
+
+        .pagination-choice a {
+            color: black;
+            padding: 8px 16px;
+            text-decoration: none;
+        }
+        .pagination-choice a.active {
+              background-color: #4CAF50;
+              color: white;
+              border-radius: 5px;
+        }
+        .pagination-choice a:hover:not(.active) {
+            background-color: #ddd;
+            border-radius: 5px;
+        }
+
+        .header-container {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+        .left-forms {
+          display: flex;
+          gap: 10px;
+        }
+        .right-form {
+          align-self: flex-end;
+        }
+        .cart-container {
+          display: flex;
+          gap: 10px;
+        }
+    </style>
 </head>
 
 <body>
-<form th:action="@{/products}">
-    <button class="button" type="submit">На главную</button>
-</form>
-<form th:action="@{/orders}">
-    <button class="button" type="submit">Список заказов</button>
-</form>
-<form th:action="@{/cart}">
-    <button class="button" type="submit">Корзина</button>
-</form>
 
+<div class="header-container">
+    <div class="left-forms">
+        <form th:action="@{/products}">
+            <button class="button" type="submit">На главную</button>
+        </form>
+        <form th:action="@{/orders}">
+            <button class="button" type="submit">Список заказов</button>
+        </form>
+    </div>
+    <div class="right-forms">
+        <form th:action="@{/cart}">
+            <button class="button" type="submit">Корзина</button>
+        </form>
+    </div>
+</div>
 
-<h1>Список товаров</h1>
+<h2>Каталог товаров</h2>
+
+<div class="form-container" style="display: none;" id="newProductForm">
+    <h3>Добавление товара</h3>
+    <form th:action="@{/products}" method="post">
+
+        <label for="name">Название:</label>
+        <input type="text" id="name" placeholder="Название товара" th:name="name" required="true"/>
+        <label for="description">Описание:</label>
+        <input type="text" id="description" placeholder="Описание товара" th:name="description" required="true"/>
+        <label for="price">Стоимость:</label>
+        <input type="text" id="price" placeholder="Стоимость товара в формате XX.XX" th:name="price" required="true"/>
+        <label for="imageUrl">Изображение:</label>
+        <input type="text" id="imageUrl" placeholder="Url изображения" th:name="imageUrl"/>
+        <label for="stock">Количество:</label>
+        <input type="text" id="stock" placeholder="Количество на складе" th:name="stock" required="true"/>
+
+        <input type="hidden" th:name="cartQuantity" th:value="null"/>
+
+        <button class="button" type="submit">Сохранить</button>
+    </form>
+</div>
 
 <div class="filter" id="filterForm">
-    <form method="GET">
-        <input type="text" id="filter" name="filter" placeholder="Введите тег" th:value="${filter}"/>
+    <form method="GET" style="display: flex">
+        <input type="text" style="margin-right: 10px" id="filter" name="filter" placeholder="Введите название товара" th:value="${filter}"/>
         <input type="hidden" id="currentPage" name="page" th:value="${products.number + 1}"/>
         <input type="hidden" id="sizePage" name="size" th:value="${products.size}"/>
         <input type="hidden" id="sortBy" name="size" th:value="${sortBy}"/>
@@ -30,29 +190,35 @@
     </form>
 </div>
 
-<a th:href="@{/products(size=${products.size}, page=${pageNumber}, filter=${filter}, sortBy=name)}"
-   th:text='name'></a>
-<a th:href="@{/products(size=${products.size}, page=${pageNumber}, filter=${filter}, sortBy=price)}"
-   th:text='price'></a>
+<div id="sortForm" style="display: flex">
+    <p>Сортировка: </p>
+    <a th:href="@{/products(size=${products.size}, page=${pageNumber}, filter=${filter}, sortBy=name)}"
+       text="По названию">По названию</a>
+    <a th:href="@{/products(size=${products.size}, page=${pageNumber}, filter=${filter}, sortBy=price)}"
+       text="По цене">По цене</a>
+</div>
 
-<div>
-    <div th:each="product : ${products}">
-        <p th:text="${product.id}"></p>
+<div id="viewProductForm">
+    <div class="product" th:each="product : ${products}">
         <h3><a th:href="@{/products/{productId}(productId=${product.id})}" th:text="${product.name}"></a></h3>
-<!--        <p th:text="${product.name}"></p>-->
-        <p th:text="${product.description}"></p>
-        <p th:text="${product.price}"></p>
-        <p th:text="${product.imageUrl}"></p>
-        <p th:text="${product.stock}"></p>
-        <p th:text="'В корзине: ' + ${product.cartQuantity}"></p>
-        <form th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
-            <button type="submit">Добавить в корзину</button>
-        </form>
-        <form th:action="@{/cart/remove/{id}(id=${product.id})}" method="post">
-            <button type="submit">Удалить из корзины</button>
-        </form>
-        <p>----</p>
+        <img th:src="@{${product.imageUrl}}" alt="image" width="300" height="300" class="product-image"/>
+        <p th:text="'Стоимость: ' + ${product.price}"></p>
+        <p th:text="'В наличии: ' + ${product.stock}"></p>
+
+        <div class="cart-container">
+            <p th:text="'В корзине: ' + ${product.cartQuantity}"></p>
+            <form th:action="@{/cart/add/{id}/products(id=${product.id})}" method="post">
+                <button class="button" type="submit">Добавить в корзину</button>
+            </form>
+            <form th:action="@{/cart/remove/{id}/products(id=${product.id})}" method="post">
+                <button class="button" type="submit">Удалить из корзины</button>
+            </form>
+        </div>
     </div>
+</div>
+
+<div class="createNewProduct">
+    <button class="button" onclick="toggleForm()" id="create-btn">Добавить товар</button>
 </div>
 
 <div id="paginationForm">
@@ -78,5 +244,21 @@
     </div>
 </div>
 
+<script>
+    function toggleForm() {
+        const createButton = document.getElementById('create-btn');
+        const filterForm = document.getElementById('filterForm');
+        const sortForm = document.getElementById('sortForm');
+        const newPostForm = document.getElementById('newProductForm');
+        const viewPostForm = document.getElementById('viewProductForm');
+        const paginationForm = document.getElementById('paginationForm');
+        createButton.innerHTML = createButton.innerHTML === 'Добавить товар' ? 'Отмена' : 'Добавить товар';
+        filterForm.style.display = filterForm.style.display === 'none' ? 'block' : 'none';
+        sortForm.style.display = sortForm.style.display === 'none' ? 'flex' : 'none';
+        newPostForm.style.display = newPostForm.style.display === 'none' ? 'block' : 'none';
+        viewPostForm.style.display = viewPostForm.style.display === 'none' ? 'block' : 'none';
+        paginationForm.style.display = paginationForm.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
 </body>
 </html>

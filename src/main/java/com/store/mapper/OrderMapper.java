@@ -20,8 +20,8 @@ public class OrderMapper {
                 order.getStatus(),
                 order.getOrderItems()
                         .stream()
-                                .map(orderItemMapper::toOrderItemDto)
-                                        .collect(Collectors.toList())
+                        .map(orderItemMapper::toOrderItemDto)
+                        .collect(Collectors.toList())
         );
     }
 

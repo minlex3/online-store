@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class PurchaseService {
@@ -29,16 +28,24 @@ public class PurchaseService {
     @Autowired
     OrderItemRepository orderItemRepository;
 
+    public Boolean isPurchaseAllowed() {
+        List<Cart> allCartItems = cartRepository.findAll();
+        return !allCartItems.isEmpty();
+    }
+
     public Long makePurchase() {
         List<Cart> allCartItems = cartRepository.findAll();
-        AtomicReference<Double> total = new AtomicReference<>(0.0);
-        allCartItems.forEach(cart -> {
-            total.set(total.get() + cart.getQuantity() * cart.getProduct().getPrice());
-        });
+        if (allCartItems.isEmpty()) {
+            return 0L;
+        }
+
+        double total = allCartItems.stream()
+                .mapToDouble(cart -> cart.getQuantity() * cart.getProduct().getPrice())
+                .sum();
 
         Order order = new Order();
-        order.setTotalAmount(total.get());
-        order.setStatus("Prepare");
+        order.setTotalAmount(total);
+        order.setStatus("Оплачен");
         orderRepository.save(order);
 
         allCartItems.forEach(cart -> {
@@ -51,9 +58,7 @@ public class PurchaseService {
         });
 
         List<Product> allProducts = productRepository.findAll();
-        allProducts.forEach(product -> {
-            product.setCart(null);
-        });
+        allProducts.forEach(product -> product.setCart(null));
 
         cartRepository.deleteAll();
 

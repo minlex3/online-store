@@ -17,7 +17,8 @@ public class Cart {
     @Column
     private int quantity;
 
-    public Cart() {}
+    public Cart() {
+    }
 
     public Cart(Long id, Product product, int quantity) {
         this.id = id;

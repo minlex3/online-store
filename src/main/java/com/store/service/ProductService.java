@@ -44,4 +44,8 @@ public class ProductService {
         Optional<Product> product = productRepository.findById(id);
         return product.map(value -> productMapper.toProductDto(value)).orElse(null);
     }
+
+    public void save(ProductDto productDto) {
+        productRepository.save(productMapper.toProduct(productDto));
+    }
 }

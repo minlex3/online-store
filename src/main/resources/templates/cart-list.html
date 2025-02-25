@@ -4,39 +4,119 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Магазин</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            text-align: center;
+        }
+        a {
+            color: black;
+            padding: 8px 16px;
+            text-decoration: none;
+            align-content: center;
+        }
+        a:hover {
+            background-color: #ddd;
+            border-radius: 5px;
+        }
+        .product-image {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+        .filter {
+            padding: 15px;
+        }
+        .createNewProduct {
+            padding: 15px;
+        }
+        .product {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .button {
+            background-color: #04AA6D; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .button:hover {
+            background-color: #3e8e41;
+        }
+
+        .header-container {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+        .left-forms {
+          display: flex;
+          gap: 10px;
+        }
+        .right-form {
+          align-self: flex-end;
+        }
+        .cart-container {
+          display: flex;
+          gap: 10px;
+        }
+    </style>
 </head>
 
 <body>
-<form th:action="@{/products}">
-    <button class="button" type="submit">На главную</button>
-</form>
-<form th:action="@{/orders}">
-    <button class="button" type="submit">Список заказов</button>
-</form>
-<form th:action="@{/cart}">
-    <button class="button" type="submit">Корзина</button>
-</form>
 
-<h1>Корзина</h1>
+<div class="header-container">
+    <div class="left-forms">
+        <form th:action="@{/products}">
+            <button class="button" type="submit">На главную</button>
+        </form>
+        <form th:action="@{/orders}">
+            <button class="button" type="submit">Список заказов</button>
+        </form>
+    </div>
+    <div class="right-forms">
+        <form th:action="@{/cart}">
+            <button class="button" type="submit">Корзина</button>
+        </form>
+    </div>
+</div>
+
+<h2>Корзина</h2>
 
 <div>
-    <p th:text="'Всего: ' + ${total}"></p>
-    <form th:action="@{/purchase}" method="post">
-        <button class="button" type="submit">Сделать заказ</button>
-    </form>
-    <div th:each="el : ${cart}">
-        <p th:text="${el.id}"></p>
-        <p th:text="'Товаров в корзине: ' + ${el.quantity}"></p>
-        <p>==></p>
-
+    <div class="product">
+        <p th:text="'Всего: ' + ${total}"></p>
+        <form th:action="@{/purchase}" method="post">
+            <button class="button" type="submit">Сделать заказ</button>
+        </form>
+    </div>
+    <div class="product" th:each="el : ${cart}">
         <h3><a th:href="@{/products/{productId}(productId=${el.product.id})}" th:text="${el.product.name}"></a></h3>
-<!--        <p th:text="${el.product.id}"></p>-->
-<!--        <p th:text="${el.product.name}"></p>-->
-        <p th:text="${el.product.description}"></p>
-        <p th:text="${el.product.price}"></p>
-        <p th:text="${el.product.imageUrl}"></p>
-        <p th:text="${el.product.stock}"></p>
-        <p>----</p>
+        <img th:src="@{${el.product.imageUrl}}" alt="image" width="300" height="300" class="product-image"/>
+        <p th:text="'Стоимость: ' + ${el.product.price}"></p>
+        <p th:text="'В наличии: ' + ${el.product.stock}"></p>
+
+        <div class="cart-container">
+            <p th:text="'В корзине: ' + ${el.quantity}"></p>
+            <form th:action="@{/cart/add/{id}/cart(id=${el.product.id})}" method="post">
+                <button class="button" type="submit">Добавить в корзину</button>
+            </form>
+            <form th:action="@{/cart/remove/{id}/cart(id=${el.product.id})}" method="post">
+                <button class="button" type="submit">Удалить из корзины</button>
+            </form>
+        </div>
     </div>
 </div>
 

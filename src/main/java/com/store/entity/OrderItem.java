@@ -24,7 +24,8 @@ public class OrderItem {
     @Column
     private Double price;
 
-    public OrderItem() {}
+    public OrderItem() {
+    }
 
     public OrderItem(Long id, Product product, Order order, int quantity, Double price) {
         this.id = id;

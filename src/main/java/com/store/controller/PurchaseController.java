@@ -15,8 +15,13 @@ public class PurchaseController {
 
     @PostMapping
     public String makePurchase() {
-        Long orderId = purchaseService.makePurchase();
+        Boolean purchaseAllowed = purchaseService.isPurchaseAllowed();
 
-        return "redirect:/orders/" + orderId;
+        if (purchaseAllowed) {
+            Long orderId = purchaseService.makePurchase();
+            return "redirect:/orders/" + orderId;
+        }
+
+        return "redirect:/cart";
     }
 }

@@ -26,7 +26,8 @@ public class Order {
     )
     private List<OrderItem> orderItems;
 
-    public Order() {}
+    public Order() {
+    }
 
     public Order(Long id, Double totalAmount, String status, List<OrderItem> orderItems) {
         this.id = id;
