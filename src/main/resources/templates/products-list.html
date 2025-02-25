@@ -20,6 +20,21 @@
 
 <h1>Список товаров</h1>
 
+<div class="filter" id="filterForm">
+    <form method="GET">
+        <input type="text" id="filter" name="filter" placeholder="Введите тег" th:value="${filter}"/>
+        <input type="hidden" id="currentPage" name="page" th:value="${products.number + 1}"/>
+        <input type="hidden" id="sizePage" name="size" th:value="${products.size}"/>
+        <input type="hidden" id="sortBy" name="size" th:value="${sortBy}"/>
+        <button class="button" type="submit">Поиск</button>
+    </form>
+</div>
+
+<a th:href="@{/products(size=${products.size}, page=${pageNumber}, filter=${filter}, sortBy=name)}"
+   th:text='name'></a>
+<a th:href="@{/products(size=${products.size}, page=${pageNumber}, filter=${filter}, sortBy=price)}"
+   th:text='price'></a>
+
 <div>
     <div th:each="product : ${products}">
         <p th:text="${product.id}"></p>
@@ -37,6 +52,29 @@
             <button type="submit">Удалить из корзины</button>
         </form>
         <p>----</p>
+    </div>
+</div>
+
+<div id="paginationForm">
+    <div>
+        <div th:if="${products.totalPages > 0}" class="pagination"
+             th:each="pageNumber : ${pageNumbers}">
+            <a th:href="@{/products(size=${products.size}, page=${pageNumber}, filter=${filter}, sortBy=${sortBy})}"
+               th:text=${pageNumber}
+               th:class="${pageNumber==products.number + 1} ? active"></a>
+        </div>
+    </div>
+    <div class="pagination-choice">
+        <span th:text="'Текущая страница '+${products.number + 1}+' из '+${products.totalPages}"/>
+        <span>Показать по :</span>
+        <a th:href="@{/products(size=1, filter=${filter}, sortBy=${sortBy})}"
+           th:class="${products.size==1} ? active">1</a>
+        <a th:href="@{/products(size=10, filter=${filter}, sortBy=${sortBy})}"
+           th:class="${products.size==10} ? active">10</a>
+        <a th:href="@{/products(size=20, filter=${filter})}"
+           th:class="${products.size==20} ? active">20</a>
+        <a th:href="@{/products(size=50, filter=${filter})}"
+           th:class="${products.size==50} ? active">50</a>
     </div>
 </div>
 

@@ -1,14 +1,14 @@
 package com.store.repository;
 
 import com.store.entity.Product;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.lang.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+public interface ProductRepository extends JpaRepository<Product, Long> {
 
-public interface ProductRepository extends CrudRepository<Product, Long> {
+    Page<Product> findByNameContainsIgnoreCaseOrderByNameAsc(@Param("name") String name, Pageable pageable);
 
-    @Override
-    @NonNull
-    List<Product> findAll();
+    Page<Product> findByNameContainsIgnoreCaseOrderByPriceAsc(@Param("name") String name, Pageable pageable);
 }
