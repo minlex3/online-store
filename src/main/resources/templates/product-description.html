@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Блог о еде</title>
+    <title>Магазин</title>
 </head>
 
 <body>
@@ -18,7 +18,7 @@
 </form>
 
 
-<h1>Описание товаров</h1>
+<h1>Описание товара</h1>
 
 <div>
     <p th:text="${product.id}"></p>
@@ -28,6 +28,13 @@
     <p th:text="${product.imageUrl}"></p>
     <p th:text="${product.stock}"></p>
     <p>----</p>
+    <p th:text="'В корзине: ' + ${product.cartQuantity}"></p>
+    <form th:action="@{/cart/add2/{id}(id=${product.id})}" method="post">
+        <button type="submit">Добавить в корзину</button>
+    </form>
+    <form th:action="@{/cart/remove2/{id}(id=${product.id})}" method="post">
+        <button type="submit">Удалить из корзины</button>
+    </form>
 </div>
 
 </body>

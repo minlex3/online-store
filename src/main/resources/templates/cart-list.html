@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Блог о еде</title>
+    <title>Магазин</title>
 </head>
 
 <body>
@@ -20,9 +20,13 @@
 <h1>Корзина</h1>
 
 <div>
+    <p th:text="'Всего: ' + ${total}"></p>
+    <form th:action="@{/purchase}" method="post">
+        <button class="button" type="submit">Сделать заказ</button>
+    </form>
     <div th:each="el : ${cart}">
         <p th:text="${el.id}"></p>
-        <p th:text="${el.quantity}"></p>
+        <p th:text="'Товаров в корзине: ' + ${el.quantity}"></p>
         <p>==></p>
 
         <h3><a th:href="@{/products/{productId}(productId=${el.product.id})}" th:text="${el.product.name}"></a></h3>

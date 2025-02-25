@@ -1,5 +1,6 @@
 package com.store.controller;
 
+import com.store.dto.OrderDto;
 import com.store.entity.Order;
 import com.store.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class OrderController {
 
     @GetMapping
     public String findAll(Model model) {
-        List<Order> all = orderService.findAll();
+        List<OrderDto> all = orderService.findAll();
         model.addAttribute("orders", all);
 
         return "orders-list";
@@ -28,7 +29,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public String findById(Model model, @PathVariable("id") Long id){
-        Order order = orderService.findById(id);
+        OrderDto order = orderService.findById(id);
         model.addAttribute("order", order);
 
         return "order-description";

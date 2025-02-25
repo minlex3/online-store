@@ -21,6 +21,13 @@
             <column name="stock" value="200"/>
             <column name="image_url" value="https://example.com/tshirt.jpg"/>
         </insert>
+        <insert tableName="products">
+            <column name="name" value="Smart switch"/>
+            <column name="description" value="very very smart switch"/>
+            <column name="price" value="9.99"/>
+            <column name="stock" value="50"/>
+            <column name="image_url" value="https://example.com/tshirt.jpg"/>
+        </insert>
     </changeSet>
 
     <!-- Добавление тестовых данных в корзину -->
