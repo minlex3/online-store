@@ -7,12 +7,22 @@
 </head>
 
 <body>
+<form th:action="@{/products}">
+    <button class="button" type="submit">На главную</button>
+</form>
+<form th:action="@{/orders}">
+    <button class="button" type="submit">Список заказов</button>
+</form>
+<form th:action="@{/cart}">
+    <button class="button" type="submit">Корзина</button>
+</form>
 
-<h1>Блог о еде</h1>
+<h1>Список заказов</h1>
 
 <div>
     <div th:each="order : ${orders}">
-        <p th:text="${order.id}"></p>
+        <h3><a th:href="@{/orders/{orderId}(orderId=${order.id})}" th:text="${order.id}"></a></h3>
+<!--        <p th:text="${order.id}"></p>-->
         <p th:text="${order.totalAmount}"></p>
         <p th:text="${order.status}"></p>
         <p>==></p>
@@ -20,7 +30,9 @@
             <p th:text="${orderItem.id}"></p>
             <p th:text="${orderItem.quantity}"></p>
             <p th:text="${orderItem.price}"></p>
-            <p th:text="${orderItem.product.name}"></p>
+
+            <h3><a th:href="@{/products/{productId}(productId=${orderItem.product.id})}" th:text="${orderItem.product.name}"></a></h3>
+<!--            <p th:text="${orderItem.product.name}"></p>-->
             <p>***</p>
         </div>
 

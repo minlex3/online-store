@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Блог о еде</title>
+</head>
+
+<body>
+<form th:action="@{/products}">
+    <button class="button" type="submit">На главную</button>
+</form>
+<form th:action="@{/orders}">
+    <button class="button" type="submit">Список заказов</button>
+</form>
+<form th:action="@{/cart}">
+    <button class="button" type="submit">Корзина</button>
+</form>
+
+
+<h1>Описание товаров</h1>
+
+<div>
+    <p th:text="${product.id}"></p>
+    <p th:text="${product.name}"></p>
+    <p th:text="${product.description}"></p>
+    <p th:text="${product.price}"></p>
+    <p th:text="${product.imageUrl}"></p>
+    <p th:text="${product.stock}"></p>
+    <p>----</p>
+</div>
+
+</body>
+</html>

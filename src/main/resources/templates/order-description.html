@@ -17,22 +17,19 @@
     <button class="button" type="submit">Корзина</button>
 </form>
 
-<h1>Корзина</h1>
+<h1>Описание заказа</h1>
 
 <div>
-    <div th:each="el : ${cart}">
-        <p th:text="${el.id}"></p>
-        <p th:text="${el.quantity}"></p>
-        <p>==></p>
-
-        <h3><a th:href="@{/products/{productId}(productId=${el.product.id})}" th:text="${el.product.name}"></a></h3>
-<!--        <p th:text="${el.product.id}"></p>-->
-<!--        <p th:text="${el.product.name}"></p>-->
-        <p th:text="${el.product.description}"></p>
-        <p th:text="${el.product.price}"></p>
-        <p th:text="${el.product.imageUrl}"></p>
-        <p th:text="${el.product.stock}"></p>
-        <p>----</p>
+    <p th:text="${order.id}"></p>
+    <p th:text="${order.totalAmount}"></p>
+    <p th:text="${order.status}"></p>
+    <p>==></p>
+    <div th:each="orderItem : ${order.orderItems}">
+        <p th:text="${orderItem.id}"></p>
+        <p th:text="${orderItem.quantity}"></p>
+        <p th:text="${orderItem.price}"></p>
+        <p th:text="${orderItem.product.name}"></p>
+        <p>***</p>
     </div>
 </div>
 

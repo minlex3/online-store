@@ -1,12 +1,14 @@
 package com.store.service;
 
 import com.store.dto.ProductDto;
+import com.store.entity.Product;
 import com.store.mapper.ProductMapper;
 import com.store.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,5 +24,10 @@ public class ProductService {
         return productRepository.findAll().stream()
                 .map(productMapper::toProductDto)
                 .collect(Collectors.toList());
+    }
+
+    public ProductDto findById(Long id) {
+        Optional<Product> product = productRepository.findById(id);
+        return product.map(value -> productMapper.toProductDto(value)).orElse(null);
     }
 }
