@@ -237,10 +237,12 @@
            th:class="${products.size==1} ? active">1</a>
         <a th:href="@{/products(size=10, filter=${filter}, sortBy=${sortBy})}"
            th:class="${products.size==10} ? active">10</a>
-        <a th:href="@{/products(size=20, filter=${filter})}"
+        <a th:href="@{/products(size=20, filter=${filter}, sortBy=${sortBy})}"
            th:class="${products.size==20} ? active">20</a>
-        <a th:href="@{/products(size=50, filter=${filter})}"
+        <a th:href="@{/products(size=50, filter=${filter}, sortBy=${sortBy})}"
            th:class="${products.size==50} ? active">50</a>
+        <a th:href="@{/products(size=100, filter=${filter}, sortBy=${sortBy})}"
+           th:class="${products.size==100} ? active">100</a>
     </div>
 </div>
 
