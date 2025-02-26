@@ -28,7 +28,7 @@ public class PurchaseControllerIntegrationTest {
     private OrderRepository orderRepository;
 
     @Test
-    void getAllProducts() throws Exception {
+    void makePurchase() throws Exception {
         mockMvc.perform(post("/purchase"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/orders/3"));

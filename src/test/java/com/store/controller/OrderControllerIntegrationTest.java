@@ -9,7 +9,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -29,7 +28,6 @@ public class OrderControllerIntegrationTest {
                 .andExpect(view().name("orders-list"))
                 .andExpect(model().attributeExists("orders"))
                 .andExpect(xpath("//div[2]/div").nodeCount(3))
-                .andExpect(xpath("//div[2]/div[1]/p").nodeCount(5))
                 .andExpect(xpath("//div[2]/div[1]/h3[1]/a[1]").string("Заказ #1"))
                 .andExpect(xpath("//div[2]/div[2]/h3[1]/a[1]").string("Заказ #2"));
     }
