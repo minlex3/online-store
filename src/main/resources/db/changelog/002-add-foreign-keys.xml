@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Внешние ключи для таблицы cart -->
+    <changeSet id="8" author="minlex">
+        <addForeignKeyConstraint
+                baseTableName="cart"
+                baseColumnNames="product_id"
+                constraintName="fk_cart_product"
+                referencedTableName="products"
+                referencedColumnNames="id"/>
+        <rollback>
+            <dropAllForeignKeyConstraints baseTableName="fk_cart_product"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Внешние ключи для таблицы order_items -->
+    <changeSet id="10" author="minlex">
+        <addForeignKeyConstraint
+                baseTableName="order_items"
+                baseColumnNames="order_id"
+                constraintName="fk_order_items_order"
+                referencedTableName="orders"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="order_items"
+                baseColumnNames="product_id"
+                constraintName="fk_order_items_product"
+                referencedTableName="products"
+                referencedColumnNames="id"/>
+        <rollback>
+            <dropAllForeignKeyConstraints baseTableName="fk_order_items_product"/>
+            <dropAllForeignKeyConstraints baseTableName="fk_order_items_order"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

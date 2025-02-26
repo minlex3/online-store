@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Добавление тестовых товаров -->
+    <changeSet id="14" author="minlex">
+        <insert tableName="products">
+            <column name="name" value="Молоток-гвоздодер GROSS"/>
+            <column name="description" value="Цельнокованый молоток-гвоздодер Gross 10470 с рабочей головкой весом 570 г и трехкомпонентной рукояткой предназначен для забивания гвоздей и извлечения застрявшего крепежа. Гвозди удобно подцеплять и выпрямлять при помощи изогнутого плоского носка с клиновидной прорезью."/>
+            <column name="price" value="2999.00"/>
+            <column name="stock" value="27"/>
+            <column name="image_url" value="https://cdn.vseinstrumenti.ru/images/goods/ruchnoj-instrument/udarno-rychazhnyj-instrument/511008/1200x800/174609262.jpg"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="Нагель КМП 7,5x212 100шт"/>
+            <column name="description" value="Наконечник острый; Шлиц Torx (T, Tx); Покрытие оцинкованный; Диаметр 7.5 мм"/>
+            <column name="price" value="1261.50"/>
+            <column name="stock" value="12"/>
+            <column name="image_url" value="https://cdn.vseinstrumenti.ru/images/goods/krepezh/metizy/1314762/1200x800/52187653.jpg"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="Строительные гвозди Gigant 3,5x90 мм, 5 кг"/>
+            <column name="description" value="Gigant Гвозди строительные 3,5x90мм, 5кг G-925565 - расходный материал для строительных, ремонтных и облицовочных работ. Их можно использовать при производстве мебели. Поставляются в фасовке по 5 кг, имеют длину 90 мм, диаметр стержня - 3,5 мм."/>
+            <column name="price" value="999.99"/>
+            <column name="stock" value="8"/>
+            <column name="image_url" value="https://cdn.vseinstrumenti.ru/images/goods/krepezh/metizy/2397382/1200x800/57834434.jpg"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="Дрель-шуруповерт Makita CXT DF333DWAE"/>
+            <column name="description" value="Аккумуляторная дрель-шуруповерт Makita DF333DWAE подходит для сверления отверстий и монтажа оснастки. Мощный светодиод позволяет работать в темных условиях и увеличивает точность выполняемых действий. Литий-ионная технология увеличивает срок службы аппарата и позволяет заряжать аккумулятор вне зависимости от степени его разрядки. Кейс в комплекте защищает набор от ударов при транспортировке и упрощает процесс хранения."/>
+            <column name="price" value="18990.05"/>
+            <column name="stock" value="2"/>
+            <column name="image_url" value="https://cdn.vseinstrumenti.ru/images/goods/stroitelnyj-instrument/shurupoverty/964589/1200x800/52439261.jpg"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="Ножницы по металлу vertextools 250 мм"/>
+            <column name="description" value="Ножницы по металлу vertextools 250 мм, усиленные 0038-07 представляют собой сочетание прочной кованой конструкции, хромомолибденовых лезвий с насечками, а также двухкомпонентных рукояток, выполненных специально по форме ладони."/>
+            <column name="price" value="348.15"/>
+            <column name="stock" value="49"/>
+            <column name="image_url" value="https://cdn.vseinstrumenti.ru/images/goods/ruchnoj-instrument/sharnirno-gubtsevyj-instrument/1897360/1200x800/73399772.jpg"/>
+        </insert>
+    </changeSet>
+
+    <!-- Добавление тестовых данных в корзину -->
+    <changeSet id="15" author="minlex">
+        <insert tableName="cart">
+            <column name="product_id" value="1"/>
+            <column name="quantity" value="2"/>
+        </insert>
+        <insert tableName="cart">
+            <column name="product_id" value="2"/>
+            <column name="quantity" value="1"/>
+        </insert>
+    </changeSet>
+
+    <!-- Добавление тестовых заказов -->
+    <changeSet id="16" author="minlex">
+        <insert tableName="orders">
+            <column name="total_amount" value="1399.98"/>
+            <column name="status" value="Упаковка"/>
+        </insert>
+        <insert tableName="orders">
+            <column name="total_amount" value="19.99"/>
+            <column name="status" value="Доставлен"/>
+        </insert>
+    </changeSet>
+
+    <!-- Добавление тестовых элементов заказа -->
+    <changeSet id="17" author="minlex">
+        <insert tableName="order_items">
+            <column name="order_id" value="1"/>
+            <column name="product_id" value="1"/>
+            <column name="quantity" value="2"/>
+            <column name="price" value="699.99"/>
+        </insert>
+        <insert tableName="order_items">
+            <column name="order_id" value="2"/>
+            <column name="product_id" value="2"/>
+            <column name="quantity" value="1"/>
+            <column name="price" value="19.99"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
