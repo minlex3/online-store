@@ -27,7 +27,7 @@ public class OrderControllerIntegrationTest {
                 .andExpect(content().contentType("text/html;charset=UTF-8"))
                 .andExpect(view().name("orders-list"))
                 .andExpect(model().attributeExists("orders"))
-                .andExpect(xpath("//div[2]/div").nodeCount(3))
+                .andExpect(xpath("//div[2]/div").nodeCount(2))
                 .andExpect(xpath("//div[2]/div[1]/h3[1]/a[1]").string("Заказ #1"))
                 .andExpect(xpath("//div[2]/div[2]/h3[1]/a[1]").string("Заказ #2"));
     }

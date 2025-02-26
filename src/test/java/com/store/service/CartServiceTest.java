@@ -49,6 +49,21 @@ public class CartServiceTest {
     }
 
     @Test
+    void removeProduct() {
+        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
+        Cart cart = new Cart(20L, product, 2);
+
+        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Optional.of(cart));
+        doNothing().when(cartRepository).delete(any());
+
+        cartService.removeProduct(10L);
+
+        cart.getProduct().setStock(17);
+        cart.getProduct().setCart(null);
+        verify(cartRepository).delete(cart);
+    }
+
+    @Test
     void addToCartExistsProduct() {
         Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
         Cart cart = new Cart(20L, product, 2);

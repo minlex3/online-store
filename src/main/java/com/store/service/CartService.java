@@ -31,6 +31,19 @@ public class CartService {
                 .collect(Collectors.toList());
     }
 
+    public void clearCart() {
+        //TOOD implements!
+    }
+
+    public void removeProduct(Long productId) {
+        Optional<Cart> cartProduct = cartRepository.findCartByProductId(productId);
+        cartProduct.ifPresent(cart -> {
+            cart.getProduct().setStock(cart.getProduct().getStock() + cart.getQuantity());
+            cart.getProduct().setCart(null);
+            cartRepository.delete(cart);
+        });
+    }
+
     public void addToCart(Long productId) {
         Optional<Product> rawProduct = productRepository.findById(productId);
         if (rawProduct.isEmpty() || rawProduct.get().getStock() == 0) {

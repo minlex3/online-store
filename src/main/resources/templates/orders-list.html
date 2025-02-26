@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        h1, h2, h3 {
+        h1, h2 {
             text-align: center;
         }
         a {
@@ -99,17 +99,17 @@
 <h2>Список заказов</h2>
 
 <div>
-    <div th:each="order : ${orders}">
+    <div class="product" th:each="order : ${orders}">
         <h3><a th:href="@{/orders/{orderId}(orderId=${order.id})}" th:text="'Заказ #' + ${order.id}"></a></h3>
-        <p th:text="'Общая стоимость: ' + ${order.totalAmount}"></p>
         <p th:text="'Статус заказ: ' + ${order.status}"></p>
 
         <p>Cостав заказа: </p>
-        <div class="product" th:each="orderItem : ${order.orderItems}">
-            <a th:href="@{/products/{productId}(productId=${orderItem.product.id})}" th:text="${orderItem.product.name}"></a>
-            <p th:text="'Количество: ' + ${orderItem.quantity}"></p>
-            <p th:text="'Стоимость: ' + ${orderItem.price}"></p>
-        </div>
+        <ul th:each="orderItem : ${order.orderItems}">
+            <li>
+                <a th:href="@{/products/{productId}(productId=${orderItem.product.id})}" th:text="${orderItem.product.name} + ' (' + ${orderItem.quantity} + ' шт.) ' + ${orderItem.price}"></a>
+            </li>
+        </ul>
+        <p th:text="'Общая стоимость: ' + ${order.totalAmount}"></p>
     </div>
 </div>
 

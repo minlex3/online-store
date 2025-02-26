@@ -56,6 +56,22 @@
         .button:hover {
             background-color: #3e8e41;
         }
+        .button-delete {
+            background-color: #C63510;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            margin: 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .button-delete:hover {
+            background-color: #8F300B;
+        }
         .form-container {
             margin-top: 20px;
         }
@@ -134,7 +150,11 @@
         }
         .cart-container {
           display: flex;
+          align-items: center;
           gap: 10px;
+        }
+        .cart-container button {
+          padding: 5px 10px;
         }
     </style>
 </head>
@@ -206,12 +226,15 @@
         <p th:text="'В наличии: ' + ${product.stock}"></p>
 
         <div class="cart-container">
-            <p th:text="'В корзине: ' + ${product.cartQuantity}"></p>
-            <form th:action="@{/cart/add/{id}/products(id=${product.id})}" method="post">
-                <button class="button" type="submit">Добавить в корзину</button>
-            </form>
             <form th:action="@{/cart/remove/{id}/products(id=${product.id})}" method="post">
-                <button class="button" type="submit">Удалить из корзины</button>
+                <button class="button" type="submit">-</button>
+            </form>
+            <p th:text="${product.cartQuantity}"></p>
+            <form th:action="@{/cart/add/{id}/products(id=${product.id})}" method="post">
+                <button class="button" type="submit">+</button>
+            </form>
+            <form th:action="@{/cart/clear/{id}/products(id=${product.id})}" method="post">
+                <button class="button-delete" type="submit">X</button>
             </form>
         </div>
     </div>

@@ -61,4 +61,19 @@ public class CartController {
             default -> "redirect:/products";
         };
     }
+
+    @PostMapping("/clear/{id}/{redirect}")
+    public String removeProduct(
+            @PathVariable("id") Long id,
+            @PathVariable("redirect") String redirect
+    ) {
+        cartService.removeProduct(id);
+
+        return switch (redirect) {
+            case "products" -> "redirect:/products";
+            case "product" -> "redirect:/products/" + id;
+            case "cart" -> "redirect:/cart";
+            default -> "redirect:/products";
+        };
+    }
 }
