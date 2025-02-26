@@ -18,7 +18,7 @@ public class Order {
     @Column
     private String status;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "order_items",
             joinColumns = @JoinColumn(name = "order_id"),
