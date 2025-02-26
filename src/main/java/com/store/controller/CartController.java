@@ -76,4 +76,11 @@ public class CartController {
             default -> "redirect:/products";
         };
     }
+
+    @PostMapping("/clear")
+    public String clearCart() {
+        cartService.clearCart();
+
+        return "redirect:/cart";
+    }
 }

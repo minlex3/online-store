@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        h1, h2, h3 {
+        h1, h2 {
             text-align: center;
         }
         a {
@@ -116,11 +116,18 @@
 <h2>Корзина</h2>
 
 <div>
-    <div class="product">
-        <p th:text="'Всего: ' + ${total}"></p>
-        <form th:action="@{/purchase}" method="post">
-            <button class="button" type="submit">Сделать заказ</button>
-        </form>
+    <h3 th:text="'Итого: ' + ${total}"></h3>
+    <div class="header-container">
+        <div class="left-forms">
+            <form th:action="@{/purchase}" method="post">
+                <button class="button" type="submit">Сделать заказ</button>
+            </form>
+        </div>
+        <div class="right-forms">
+            <form th:action="@{/cart/clear}" method="post">
+                <button class="button-delete" type="submit">Очистить корзину</button>
+            </form>
+        </div>
     </div>
     <div class="product" th:each="el : ${cart}">
         <h3><a th:href="@{/products/{productId}(productId=${el.product.id})}" th:text="${el.product.name}"></a></h3>

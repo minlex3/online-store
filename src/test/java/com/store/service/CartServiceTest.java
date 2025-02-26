@@ -64,6 +64,21 @@ public class CartServiceTest {
     }
 
     @Test
+    void clearCart() {
+        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
+        Cart cart = new Cart(20L, product, 2);
+
+        when(cartRepository.findAll()).thenReturn(List.of(cart));
+        doNothing().when(cartRepository).deleteAll(any());
+
+        cartService.clearCart();
+
+        cart.getProduct().setStock(17);
+        cart.getProduct().setCart(null);
+        verify(cartRepository).deleteAll(List.of(cart));
+    }
+
+    @Test
     void addToCartExistsProduct() {
         Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
         Cart cart = new Cart(20L, product, 2);

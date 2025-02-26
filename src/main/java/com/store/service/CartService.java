@@ -32,7 +32,12 @@ public class CartService {
     }
 
     public void clearCart() {
-        //TOOD implements!
+        List<Cart> cartList = cartRepository.findAll();
+        cartList.forEach(cart -> {
+            cart.getProduct().setStock(cart.getProduct().getStock() + cart.getQuantity());
+            cart.getProduct().setCart(null);
+        });
+        cartRepository.deleteAll(cartList);
     }
 
     public void removeProduct(Long productId) {
