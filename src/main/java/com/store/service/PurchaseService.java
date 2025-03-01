@@ -8,6 +8,7 @@ import com.store.repository.OrderItemRepository;
 import com.store.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class PurchaseService {
         return !allCartItems.isEmpty();
     }
 
+    @Transactional
     public Long makePurchase() {
         List<Cart> allCartItems = cartRepository.findAll();
         if (allCartItems.isEmpty()) {

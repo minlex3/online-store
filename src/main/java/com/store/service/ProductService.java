@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class ProductService {
         return product.map(value -> productMapper.toProductDto(value)).orElse(null);
     }
 
+    @Transactional
     public void save(ProductDto productDto) {
         productRepository.save(productMapper.toProduct(productDto));
     }
