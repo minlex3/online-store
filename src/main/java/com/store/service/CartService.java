@@ -35,7 +35,8 @@ public class CartService {
         List<Cart> cartList = cartRepository.findAll();
         cartList.forEach(cart -> {
             cart.getProduct().setStock(cart.getProduct().getStock() + cart.getQuantity());
-            cart.getProduct().setCart(null);
+//            cart.getProduct().setCart(null);
+            cart.getProduct().setCarts(null);
         });
         cartRepository.deleteAll(cartList);
     }
@@ -44,7 +45,8 @@ public class CartService {
         Optional<Cart> cartProduct = cartRepository.findCartByProductId(productId);
         cartProduct.ifPresent(cart -> {
             cart.getProduct().setStock(cart.getProduct().getStock() + cart.getQuantity());
-            cart.getProduct().setCart(null);
+//            cart.getProduct().setCart(null);
+            cart.getProduct().setCarts(null);
             cartRepository.delete(cart);
         });
     }
@@ -84,7 +86,7 @@ public class CartService {
         Cart cart = rawCart.get();
 
         if (cart.getQuantity() == 1) {
-            product.setCart(null);
+            product.setCarts(null);
             cartRepository.delete(cart);
         } else {
             cart.setQuantity(cart.getQuantity() - 1);

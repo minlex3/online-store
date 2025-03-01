@@ -51,7 +51,7 @@ public class PurchaseService {
             orderItem.setPrice(cart.getProduct().getPrice());
             orderItemRepository.save(orderItem);
 
-            cart.getProduct().setCart(null);
+            cart.getProduct().setCarts(null);
         });
 
         cartRepository.deleteAll();

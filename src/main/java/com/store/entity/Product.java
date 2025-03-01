@@ -2,6 +2,8 @@ package com.store.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "products")
 public class Product {
@@ -25,20 +27,20 @@ public class Product {
     @Column
     private int stock;
 
-    @OneToOne(mappedBy = "product")
-    private Cart cart;
+    @OneToMany(mappedBy = "product")
+    private List<Cart> carts;
 
     public Product() {
     }
 
-    public Product(Long id, String name, String description, Double price, String imageUrl, int stock, Cart cart) {
+    public Product(Long id, String name, String description, Double price, String imageUrl, int stock, List<Cart> carts) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.imageUrl = imageUrl;
         this.stock = stock;
-        this.cart = cart;
+        this.carts = carts;
     }
 
     public Long getId() {
@@ -89,28 +91,18 @@ public class Product {
         this.stock = stock;
     }
 
-    public Cart getCart() {
-        return cart;
+    public List<Cart> getCarts() {
+        return carts;
     }
 
-    public void setCart(Cart cart) {
-        this.cart = cart;
+    public void setCarts(List<Cart> carts) {
+        this.carts = carts;
     }
 
     public int getCartQuantity() {
-        return cart != null ? cart.getQuantity() : 0;
-//        return cart.getQuantity();
+        if (carts == null || carts.isEmpty()) {
+            return 0;
+        }
+        return carts.stream().mapToInt(Cart::getQuantity).sum();
     }
-
-//    public List<OrderItem> getOrderItems() {
-//        return orderItems;
-//    }
-//
-//    public void setOrderItems(List<OrderItem> orderItems) {
-//        this.orderItems = orderItems;
-//    }
-//
-//    public int getOrderItemsCount() {
-//        return orderItems != null ? orderItems.size() : 0;
-//    }
 }
