@@ -8,6 +8,7 @@ import com.store.repository.CartRepository;
 import com.store.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,24 +32,27 @@ public class CartService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void clearCart() {
         List<Cart> cartList = cartRepository.findAll();
         cartList.forEach(cart -> {
             cart.getProduct().setStock(cart.getProduct().getStock() + cart.getQuantity());
-            cart.getProduct().setCart(null);
+            cart.getProduct().setCarts(null);
         });
         cartRepository.deleteAll(cartList);
     }
 
+    @Transactional
     public void removeProduct(Long productId) {
         Optional<Cart> cartProduct = cartRepository.findCartByProductId(productId);
         cartProduct.ifPresent(cart -> {
             cart.getProduct().setStock(cart.getProduct().getStock() + cart.getQuantity());
-            cart.getProduct().setCart(null);
+            cart.getProduct().setCarts(null);
             cartRepository.delete(cart);
         });
     }
 
+    @Transactional
     public void addToCart(Long productId) {
         Optional<Product> rawProduct = productRepository.findById(productId);
         if (rawProduct.isEmpty() || rawProduct.get().getStock() == 0) {
@@ -74,6 +78,7 @@ public class CartService {
         cartRepository.save(cart);
     }
 
+    @Transactional
     public void removeFromCart(Long productId) {
         Optional<Product> rawProduct = productRepository.findById(productId);
         Optional<Cart> rawCart = cartRepository.findCartByProductId(productId);
@@ -84,7 +89,7 @@ public class CartService {
         Cart cart = rawCart.get();
 
         if (cart.getQuantity() == 1) {
-            product.setCart(null);
+            product.setCarts(null);
             cartRepository.delete(cart);
         } else {
             cart.setQuantity(cart.getQuantity() - 1);

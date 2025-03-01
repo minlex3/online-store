@@ -59,7 +59,7 @@ public class CartServiceTest {
         cartService.removeProduct(10L);
 
         cart.getProduct().setStock(17);
-        cart.getProduct().setCart(null);
+        cart.getProduct().setCarts(null);
         verify(cartRepository).delete(cart);
     }
 
@@ -74,7 +74,7 @@ public class CartServiceTest {
         cartService.clearCart();
 
         cart.getProduct().setStock(17);
-        cart.getProduct().setCart(null);
+        cart.getProduct().setCarts(null);
         verify(cartRepository).deleteAll(List.of(cart));
     }
 
