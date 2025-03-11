@@ -1,22 +1,20 @@
 package com.store.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
 @Table(name = "order_items")
 public class OrderItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @Column
+    private Long productId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @Column
+    private Long orderId;
 
     @Column
     private int quantity;
@@ -27,10 +25,10 @@ public class OrderItem {
     public OrderItem() {
     }
 
-    public OrderItem(Long id, Product product, Order order, int quantity, Double price) {
+    public OrderItem(Long id, Long productId, Long orderId, int quantity, Double price) {
         this.id = id;
-        this.product = product;
-        this.order = order;
+        this.productId = productId;
+        this.orderId = orderId;
         this.quantity = quantity;
         this.price = price;
     }
@@ -43,12 +41,12 @@ public class OrderItem {
         this.id = id;
     }
 
-    public Product getProduct() {
-        return product;
+    public Long getProductId() {
+        return productId;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
     public int getQuantity() {
@@ -67,11 +65,11 @@ public class OrderItem {
         this.price = price;
     }
 
-    public Order getOrder() {
-        return order;
+    public Long getOrder() {
+        return orderId;
     }
 
-    public void setOrder(Order order) {
-        this.order = order;
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 }

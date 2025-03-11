@@ -1,15 +1,13 @@
 package com.store.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.List;
-
-@Entity
 @Table(name = "orders")
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
@@ -18,22 +16,13 @@ public class Order {
     @Column
     private String status;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "order_items",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id")
-    )
-    private List<OrderItem> orderItems;
-
     public Order() {
     }
 
-    public Order(Long id, Double totalAmount, String status, List<OrderItem> orderItems) {
+    public Order(Long id, Double totalAmount, String status) {
         this.id = id;
         this.totalAmount = totalAmount;
         this.status = status;
-        this.orderItems = orderItems;
     }
 
     public Long getId() {
@@ -58,13 +47,5 @@ public class Order {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public List<OrderItem> getOrderItems() {
-        return orderItems;
-    }
-
-    public void setOrderItems(List<OrderItem> orderItems) {
-        this.orderItems = orderItems;
     }
 }

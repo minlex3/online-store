@@ -1,28 +1,29 @@
 package com.store.entity;
 
-import jakarta.persistence.*;
 
-@Entity
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
 @Table(name = "cart")
 public class Cart {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column("id")
     private Long id;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @Column("product_id")
+    private Long productId;
 
-    @Column
+    @Column("quantity")
     private int quantity;
 
     public Cart() {
     }
 
-    public Cart(Long id, Product product, int quantity) {
+    public Cart(Long id, Long productId, int quantity) {
         this.id = id;
-        this.product = product;
+        this.productId = productId;
         this.quantity = quantity;
     }
 
@@ -34,12 +35,12 @@ public class Cart {
         this.id = id;
     }
 
-    public Product getProduct() {
-        return product;
+    public Long getProductId() {
+        return productId;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
     public int getQuantity() {

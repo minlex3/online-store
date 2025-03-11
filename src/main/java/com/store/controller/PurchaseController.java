@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import reactor.core.publisher.Mono;
 
 @Controller
 @RequestMapping("/purchase")
@@ -14,14 +15,9 @@ public class PurchaseController {
     PurchaseService purchaseService;
 
     @PostMapping
-    public String makePurchase() {
-        Boolean purchaseAllowed = purchaseService.isPurchaseAllowed();
-
-        if (purchaseAllowed) {
-            Long orderId = purchaseService.makePurchase();
-            return "redirect:/orders/" + orderId;
-        }
-
-        return "redirect:/cart";
+    public Mono<String> makePurchase() {
+        return purchaseService.makePurchase()
+                .map(orderId -> "redirect:/orders/" + orderId)
+                .onErrorResume(e -> Mono.just("redirect:/cart"));
     }
 }

@@ -11,7 +11,7 @@ public class ProductMapperTest {
 
     @Test
     public void testToProductDto() {
-        Product product = new Product(20L, "product", "desc", 10.12, "url", 3, null);
+        Product product = new Product(20L, "product", "desc", 10.12, "url", 3, 0);
 
         ProductDto productDto = productMapper.toProductDto(product);
 

@@ -3,15 +3,14 @@ package com.store.controller;
 import com.store.dto.ProductDto;
 import com.store.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 @Controller
 @RequestMapping("/products")
@@ -21,46 +20,44 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public String findAll(
+    public Mono<String> findAll(
             Model model,
-            @RequestParam("page") Optional<Integer> rawPage,
-            @RequestParam("size") Optional<Integer> rawSize,
-            @RequestParam("filter") Optional<String> rawFilter,
-            @RequestParam("sortBy") Optional<String> rawSortBy
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "filter", defaultValue = "") String filter,
+            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy
     ) {
-        int currentPage = rawPage.orElse(1);
-        int pageSize = rawSize.orElse(10);
-        String filter = rawFilter.orElse("");
-        String sortBy = rawSortBy.orElse("name");
+        return productService.searchProducts(page - 1, size, filter, sortBy)
+                .doOnNext(response -> {
+                    long totalPages = response.getTotalElements();
+                    if (totalPages > 0) {
+                        List<Long> pageNumbers = LongStream.rangeClosed(1L, totalPages)
+                                .boxed()
+                                .collect(Collectors.toList());
+                        model.addAttribute("pageNumbers", pageNumbers);
+                    }
 
-        Page<ProductDto> products = productService.findAll(currentPage - 1, pageSize, filter, sortBy);
+                    model.addAttribute("products", response.getData());
+                    model.addAttribute("page", page);
+                    model.addAttribute("size", size);
+                    model.addAttribute("totalPages", (int) Math.ceil((double) response.getTotalElements() / size));
 
-        model.addAttribute("products", products);
-        model.addAttribute("filter", filter);
-        model.addAttribute("sortBy", sortBy);
-
-        int totalPages = products.getTotalPages();
-        if (totalPages > 0) {
-            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-                    .boxed()
-                    .collect(Collectors.toList());
-            model.addAttribute("pageNumbers", pageNumbers);
-        }
-        return "products-list";
+                    model.addAttribute("filter", filter);
+                    model.addAttribute("sortBy", sortBy);
+                })
+                .thenReturn("products-list");
     }
 
     @GetMapping("/{id}")
-    public String findById(Model model, @PathVariable("id") Long id) {
-        ProductDto product = productService.findById(id);
-
-        model.addAttribute("product", product);
-        return "product-description";
+    public Mono<String> findById(Model model, @PathVariable("id") Long id) {
+        return productService.findById(id)
+                .doOnNext(product -> model.addAttribute("product", product))
+                .thenReturn("product-description");
     }
 
     @PostMapping
-    public String save(@ModelAttribute ProductDto product) {
-        productService.save(product);
-
-        return "redirect:/products";
+    public Mono<String> save(@ModelAttribute ProductDto product) {
+        return productService.save(product)
+                .thenReturn("redirect:/products");
     }
 }

@@ -1,24 +1,22 @@
 package com.store.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.List;
-
-@Entity
 @Table(name = "products")
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private String name;
 
     @Column
     private String description;
 
-    @Column(nullable = false)
+    @Column
     private Double price;
 
     @Column
@@ -27,20 +25,19 @@ public class Product {
     @Column
     private int stock;
 
-    @OneToMany(mappedBy = "product")
-    private List<Cart> carts;
+    private int cartQuantity;
 
     public Product() {
     }
 
-    public Product(Long id, String name, String description, Double price, String imageUrl, int stock, List<Cart> carts) {
+    public Product(Long id, String name, String description, Double price, String imageUrl, int stock, int cartQuantity) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.imageUrl = imageUrl;
         this.stock = stock;
-        this.carts = carts;
+        this.cartQuantity = cartQuantity;
     }
 
     public Long getId() {
@@ -91,18 +88,11 @@ public class Product {
         this.stock = stock;
     }
 
-    public List<Cart> getCarts() {
-        return carts;
-    }
-
-    public void setCarts(List<Cart> carts) {
-        this.carts = carts;
-    }
-
     public int getCartQuantity() {
-        if (carts == null || carts.isEmpty()) {
-            return 0;
-        }
-        return carts.stream().mapToInt(Cart::getQuantity).sum();
+        return cartQuantity;
+    }
+
+    public void setCartQuantity(int cartQuantity) {
+        this.cartQuantity = cartQuantity;
     }
 }

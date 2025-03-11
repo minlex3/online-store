@@ -1,20 +1,17 @@
 package com.store.mapper;
 
 import com.store.dto.OrderItemDto;
+import com.store.dto.ProductDto;
 import com.store.entity.OrderItem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OrderItemMapper {
 
-    @Autowired
-    ProductMapper productMapper;
-
-    public OrderItemDto toOrderItemDto(OrderItem orderItem) {
+    public OrderItemDto toOrderItemDto(OrderItem orderItem, ProductDto productDto) {
         return new OrderItemDto(
                 orderItem.getId(),
-                productMapper.toProductDto(orderItem.getProduct()),
+                productDto,
                 orderItem.getQuantity(),
                 orderItem.getPrice()
         );
@@ -23,7 +20,7 @@ public class OrderItemMapper {
     public OrderItem toOrderItem(OrderItemDto orderItemDto) {
         OrderItem orderItem = new OrderItem();
         orderItem.setId(orderItemDto.id());
-        orderItem.setProduct(productMapper.toProduct(orderItemDto.product()));
+        orderItem.setProductId(orderItemDto.product().id());
         orderItem.setQuantity(orderItemDto.quantity());
         orderItem.setPrice(orderItemDto.price());
         return orderItem;

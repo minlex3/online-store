@@ -4,12 +4,12 @@ import com.store.dto.OrderDto;
 import com.store.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.List;
+import org.springframework.web.reactive.result.view.Rendering;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Controller
 @RequestMapping("/orders")
@@ -19,18 +19,22 @@ public class OrderController {
     private OrderService orderService;
 
     @GetMapping
-    public String findAll(Model model) {
-        List<OrderDto> orderDtoList = orderService.findAll();
-        model.addAttribute("orders", orderDtoList);
+    public Mono<Rendering> findAll() {
+        Flux<OrderDto> orderDtoList = orderService.findAll();
+        Rendering r = Rendering.view("orders-list")
+                .modelAttribute("orders", orderDtoList)
+                .build();
 
-        return "orders-list";
+        return Mono.just(r);
     }
 
     @GetMapping("/{id}")
-    public String findById(Model model, @PathVariable("id") Long id) {
-        OrderDto order = orderService.findById(id);
-        model.addAttribute("order", order);
+    public Mono<Rendering> findById(@PathVariable("id") Long id) {
+        Mono<OrderDto> order = orderService.findById(id);
+        Rendering r = Rendering.view("order-description")
+                .modelAttribute("order", order)
+                .build();
 
-        return "order-description";
+        return Mono.just(r);
     }
 }
