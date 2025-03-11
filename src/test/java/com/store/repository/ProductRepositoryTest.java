@@ -13,8 +13,8 @@ public class ProductRepositoryTest {
 
     @Test
     public void firstTest() {
-        productRepository.save("name", "desc", 12.34, "url", 10)
-                .then(productRepository.findByName("name"))
+        productRepository.save("someProduct", "desc", 12.34, "url", 10)
+                .then(productRepository.findByName("someProduct"))
                 .as(StepVerifier::create)
                 .expectNextMatches(p -> p.getPrice().equals(12.34))
                 .verifyComplete();
