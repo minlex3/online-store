@@ -1,6 +1,5 @@
 package com.store.controller;
 
-import com.store.dto.CartDto;
 import com.store.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,8 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.List;
+import reactor.core.publisher.Mono;
 
 @Controller
 @RequestMapping("/cart")
@@ -20,67 +18,66 @@ public class CartController {
     private CartService cartService;
 
     @GetMapping
-    public String findAll(Model model) {
-        List<CartDto> cartDtoList = cartService.findAll();
+    public Mono<String> findAll(Model model) {
+        return cartService.findAll()
+                .collectList()
+                .map(cartList -> {
+                    double total = cartList.stream()
+                            .mapToDouble(cartDto -> cartDto.quantity() * cartDto.product().price())
+                            .sum();
 
-        double total = cartDtoList.stream()
-                .mapToDouble(cartDto -> cartDto.quantity() * cartDto.product().price())
-                .sum();
+                    model.addAttribute("cart", cartList);
+                    model.addAttribute("total", total);
 
-        model.addAttribute("cart", cartDtoList);
-        model.addAttribute("total", total);
-        return "cart-list";
+                    return "cart-list";
+                });
     }
 
     @PostMapping("/add/{id}/{redirect}")
-    public String addToCart(
+    public Mono<String> addToCart(
             @PathVariable("id") Long id,
             @PathVariable("redirect") String redirect
     ) {
-        cartService.addToCart(id);
-
-        return switch (redirect) {
-            case "products" -> "redirect:/products";
-            case "product" -> "redirect:/products/" + id;
-            case "cart" -> "redirect:/cart";
-            default -> "redirect:/products";
-        };
+        return cartService.addToCart(id)
+                .thenReturn(switch (redirect) {
+                    case "products" -> "redirect:/products";
+                    case "product" -> "redirect:/products/" + id;
+                    case "cart" -> "redirect:/cart";
+                    default -> "redirect:/products";
+                });
     }
 
     @PostMapping("/remove/{id}/{redirect}")
-    public String removeFromCart(
+    public Mono<String> removeFromCart(
             @PathVariable("id") Long id,
             @PathVariable("redirect") String redirect
     ) {
-        cartService.removeFromCart(id);
-
-        return switch (redirect) {
-            case "products" -> "redirect:/products";
-            case "product" -> "redirect:/products/" + id;
-            case "cart" -> "redirect:/cart";
-            default -> "redirect:/products";
-        };
+        return cartService.removeFromCart(id)
+                .thenReturn(switch (redirect) {
+                    case "products" -> "redirect:/products";
+                    case "product" -> "redirect:/products/" + id;
+                    case "cart" -> "redirect:/cart";
+                    default -> "redirect:/products";
+                });
     }
 
     @PostMapping("/clear/{id}/{redirect}")
-    public String removeProduct(
+    public Mono<String> removeProduct(
             @PathVariable("id") Long id,
             @PathVariable("redirect") String redirect
     ) {
-        cartService.removeProduct(id);
-
-        return switch (redirect) {
-            case "products" -> "redirect:/products";
-            case "product" -> "redirect:/products/" + id;
-            case "cart" -> "redirect:/cart";
-            default -> "redirect:/products";
-        };
+        return cartService.removeProduct(id)
+                .thenReturn(switch (redirect) {
+                    case "products" -> "redirect:/products";
+                    case "product" -> "redirect:/products/" + id;
+                    case "cart" -> "redirect:/cart";
+                    default -> "redirect:/products";
+                });
     }
 
     @PostMapping("/clear")
-    public String clearCart() {
-        cartService.clearCart();
-
-        return "redirect:/cart";
+    public Mono<String> clearCart() {
+        return cartService.clearCart()
+                .thenReturn("redirect:/cart");
     }
 }

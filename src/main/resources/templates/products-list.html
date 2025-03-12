@@ -194,7 +194,7 @@
         <label for="stock">Количество:</label>
         <input type="text" id="stock" placeholder="Количество на складе" th:name="stock" required="true"/>
 
-        <input type="hidden" th:name="cartQuantity" th:value="null"/>
+        <input type="hidden" th:name="cartQuantity" th:value="0"/>
 
         <button class="button" type="submit">Сохранить</button>
     </form>
@@ -203,18 +203,18 @@
 <div class="filter" id="filterForm">
     <form method="GET" style="display: flex">
         <input type="text" style="margin-right: 10px" id="filter" name="filter" placeholder="Введите название товара" th:value="${filter}"/>
-        <input type="hidden" id="currentPage" name="page" th:value="${products.number + 1}"/>
-        <input type="hidden" id="sizePage" name="size" th:value="${products.size}"/>
-        <input type="hidden" id="sortBy" name="size" th:value="${sortBy}"/>
+        <input type="hidden" id="currentPage" name="page" th:value="${page}"/>
+        <input type="hidden" id="sizePage" name="size" th:value="${size}"/>
+        <input type="hidden" id="sortBy" name="sortBy" th:value="${sortBy}"/>
         <button class="button" type="submit">Поиск</button>
     </form>
 </div>
 
 <div id="sortForm" style="display: flex">
     <p>Сортировка: </p>
-    <a th:href="@{/products(size=${products.size}, page=${pageNumber}, filter=${filter}, sortBy=name)}"
+    <a th:href="@{/products(size=${size}, page=${page}, filter=${filter}, sortBy=name)}"
        text="По названию">По названию</a>
-    <a th:href="@{/products(size=${products.size}, page=${pageNumber}, filter=${filter}, sortBy=price)}"
+    <a th:href="@{/products(size=${size}, page=${page}, filter=${filter}, sortBy=price)}"
        text="По цене">По цене</a>
 </div>
 
@@ -246,26 +246,26 @@
 
 <div id="paginationForm">
     <div>
-        <div th:if="${products.totalPages > 0}" class="pagination"
+        <div th:if="${totalPages > 1}" class="pagination"
              th:each="pageNumber : ${pageNumbers}">
             <a th:href="@{/products(size=${products.size}, page=${pageNumber}, filter=${filter}, sortBy=${sortBy})}"
                th:text=${pageNumber}
-               th:class="${pageNumber==products.number + 1} ? active"></a>
+               th:class="${pageNumber==page} ? active"></a>
         </div>
     </div>
     <div class="pagination-choice">
-        <span th:text="'Текущая страница '+${products.number + 1}+' из '+${products.totalPages}"/>
+        <span th:text="'Текущая страница '+${page}+' из '+${totalPages}"/>
         <span>Показать по :</span>
         <a th:href="@{/products(size=1, filter=${filter}, sortBy=${sortBy})}"
-           th:class="${products.size==1} ? active">1</a>
+           th:class="${size==1} ? active">1</a>
         <a th:href="@{/products(size=10, filter=${filter}, sortBy=${sortBy})}"
-           th:class="${products.size==10} ? active">10</a>
+           th:class="${size==10} ? active">10</a>
         <a th:href="@{/products(size=20, filter=${filter}, sortBy=${sortBy})}"
-           th:class="${products.size==20} ? active">20</a>
+           th:class="${size==20} ? active">20</a>
         <a th:href="@{/products(size=50, filter=${filter}, sortBy=${sortBy})}"
-           th:class="${products.size==50} ? active">50</a>
+           th:class="${size==50} ? active">50</a>
         <a th:href="@{/products(size=100, filter=${filter}, sortBy=${sortBy})}"
-           th:class="${products.size==100} ? active">100</a>
+           th:class="${size==100} ? active">100</a>
     </div>
 </div>
 

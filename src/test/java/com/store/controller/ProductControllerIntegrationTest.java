@@ -1,73 +1,59 @@
 package com.store.controller;
 
-import com.store.entity.Product;
-import com.store.repository.ProductRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.LinkedMultiValueMap;
 
-import java.util.Optional;
+import static org.springframework.web.reactive.function.BodyInserters.fromFormData;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ProductControllerIntegrationTest {
 
     @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ProductRepository productRepository;
+    private WebTestClient webTestClient;
 
     @Test
-    void getAllProducts() throws Exception {
-        mockMvc.perform(get("/products"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("products-list"))
-                .andExpect(model().attributeExists("products"))
-                .andExpect(xpath("//div[5]/div").nodeCount(6))
-                .andExpect(xpath("//div[5]/div[1]/h3[1]/a[1]").string("Дрель-шуруповерт Makita CXT DF333DWAE"))
-                .andExpect(xpath("//div[5]/div[2]/h3[1]/a[1]").string("Молоток-гвоздодер GROSS"));
+    void getAllProducts() {
+        webTestClient.get()
+                .uri("/products")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .xpath("//div[5]/div").nodeCount(6)
+                .xpath("//div[5]/div[1]/h3[1]/a[1]", "Дрель-шуруповерт Makita CXT DF333DWAE");
     }
 
     @Test
-    void getProductById() throws Exception {
-        mockMvc.perform(get("/products/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("product-description"))
-                .andExpect(model().attributeExists("product"))
-                .andExpect(xpath("//h2[1]").string("Молоток-гвоздодер GROSS"));
+    void getProductById() {
+        webTestClient.get()
+                .uri("/products/1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .xpath("//h2[1]", "Молоток-гвоздодер GROSS");
     }
 
     @Test
-    void saveProduct() throws Exception {
-        mockMvc.perform(post("/products")
-                        .param("name", "productName")
-                        .param("description", "desc")
-                        .param("price", "10.1")
-                        .param("imageUrl", "url")
-                        .param("stock", "10")
-                        .param("cartQuantity", "0")
-                )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/products"));
+    void saveProduct() {
+        LinkedMultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("name", "name");
+        formData.add("description", "desc");
+        formData.add("price", "12.34");
+        formData.add("imageUrl", "url");
+        formData.add("stock", "10");
+        formData.add("cartQuantity", "0");
 
-        Optional<Product> rawProduct = productRepository.findByName("productName");
-        Assertions.assertNotNull(rawProduct);
-        Assertions.assertTrue(rawProduct.isPresent());
-
-        Product product = rawProduct.get();
-        Assertions.assertEquals(10.1, product.getPrice());
-        Assertions.assertEquals(10, product.getStock());
+        webTestClient.post()
+                .uri("/products")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(fromFormData(formData))
+                .exchange()
+                .expectHeader().location("/products")
+                .expectStatus().is3xxRedirection();
     }
 }

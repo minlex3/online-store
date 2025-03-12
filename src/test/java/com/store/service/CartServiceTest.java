@@ -6,14 +6,13 @@ import com.store.entity.Cart;
 import com.store.entity.Product;
 import com.store.repository.CartRepository;
 import com.store.repository.ProductRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-import java.util.List;
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -33,69 +32,79 @@ public class CartServiceTest {
 
     @Test
     void findAll() {
-        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
-        Cart cart = new Cart(10L, product, 2);
-        when(cartRepository.findAll()).thenReturn(List.of(cart));
+        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, 0);
+        Cart cart = new Cart(10L, 10L, 2);
 
-        List<CartDto> cartDtos = cartService.findAll();
-        Assertions.assertEquals(1, cartDtos.size());
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart));
+        when(productRepository.findById(anyLong())).thenReturn(Mono.just(product));
 
-        CartDto cartDto = cartDtos.getFirst();
-        Assertions.assertEquals(cart.getId(), cartDto.id());
-        Assertions.assertEquals(cart.getQuantity(), cartDto.quantity());
-        Assertions.assertEquals(cart.getProduct().getId(), cartDto.product().id());
-        Assertions.assertEquals(cart.getProduct().getName(), cartDto.product().name());
-        Assertions.assertEquals(cart.getProduct().getDescription(), cartDto.product().description());
+        Flux<CartDto> cartDtos = cartService.findAll();
+
+        StepVerifier.create(cartDtos)
+                .expectNextMatches(
+                        el -> el.id().equals(cart.getId())
+                                && el.quantity() == cart.getQuantity()
+                                && el.product().id().equals(cart.getProductId())
+                                && el.product().name().equals(product.getName())
+                )
+                .expectComplete()
+                .verify();
     }
 
     @Test
     void removeProduct() {
-        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
-        Cart cart = new Cart(20L, product, 2);
+        Cart cart = new Cart(20L, 10L, 2);
 
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Optional.of(cart));
-        doNothing().when(cartRepository).delete(any());
+        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.just(cart));
+        when(productRepository.increaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
+        when(cartRepository.deleteByProductId(anyLong())).thenReturn(Mono.empty());
 
-        cartService.removeProduct(10L);
+        Mono<Void> result = cartService.removeProduct(10L);
 
-        cart.getProduct().setStock(17);
-        cart.getProduct().setCarts(null);
-        verify(cartRepository).delete(cart);
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(cartRepository).findCartByProductId(10L);
+        verify(productRepository).increaseById(10L, 2);
+        verify(cartRepository).deleteByProductId(10L);
     }
 
     @Test
     void clearCart() {
-        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
-        Cart cart = new Cart(20L, product, 2);
+        Cart cart = new Cart(20L, 10L, 2);
 
-        when(cartRepository.findAll()).thenReturn(List.of(cart));
-        doNothing().when(cartRepository).deleteAll(any());
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart));
+        when(productRepository.increaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
+        when(cartRepository.deleteAll()).thenReturn(Mono.empty());
 
-        cartService.clearCart();
+        Mono<Void> result = cartService.clearCart();
 
-        cart.getProduct().setStock(17);
-        cart.getProduct().setCarts(null);
-        verify(cartRepository).deleteAll(List.of(cart));
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(cartRepository).findAll();
+        verify(productRepository).increaseById(10L, 2);
     }
 
     @Test
     void addToCartExistsProduct() {
-        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
-        Cart cart = new Cart(20L, product, 2);
+        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, 0);
+        Cart cart = new Cart(20L, 10L, 2);
 
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Optional.of(cart));
+        when(productRepository.findById(anyLong())).thenReturn(Mono.just(product));
+        when(productRepository.decreaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
+        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.just(cart));
 
-        when(productRepository.save(any())).thenReturn(null);
-        when(cartRepository.save(any())).thenReturn(null);
+        when(cartRepository.save(any())).thenReturn(Mono.just(cart));
 
-        cartService.addToCart(10L);
+        Mono<Void> result = cartService.addToCart(10L);
+
+        StepVerifier.create(result)
+                .verifyComplete();
 
         verify(productRepository).findById(10L);
+        verify(productRepository).decreaseById(10L, 1);
         verify(cartRepository).findCartByProductId(10L);
-
-        product.setStock(product.getStock() - 1);
-        verify(productRepository).save(product);
 
         cart.setQuantity(cart.getQuantity() + 1);
         verify(cartRepository).save(cart);
@@ -103,111 +112,105 @@ public class CartServiceTest {
 
     @Test
     void addToCartNonExistsProduct() {
-        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
+        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, 0);
 
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Optional.empty());
+        when(productRepository.findById(anyLong())).thenReturn(Mono.just(product));
+        when(productRepository.decreaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
+        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.empty());
 
-        when(productRepository.save(any())).thenReturn(null);
-        when(cartRepository.save(any())).thenReturn(null);
+        when(cartRepository.save(any())).thenReturn(Mono.just(new Cart()));
 
-        cartService.addToCart(10L);
+        Mono<Void> result = cartService.addToCart(10L);
+
+        StepVerifier.create(result)
+                .verifyComplete();
 
         verify(productRepository).findById(10L);
+        verify(productRepository).decreaseById(10L, 1);
         verify(cartRepository).findCartByProductId(10L);
-
-        product.setStock(product.getStock() - 1);
-        verify(productRepository).save(product);
 
         verify(cartRepository).save(any(Cart.class));
     }
 
     @Test
     void addToCartOutOfStock() {
-        Product product = new Product(10L, "product", "desc", 12.34, "url", 0, null);
-        Cart cart = new Cart(20L, product, 2);
+        Product product = new Product(10L, "product", "desc", 12.34, "url", 0, 0);
+        Cart cart = new Cart(20L, 10L, 2);
 
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Optional.of(cart));
+        when(productRepository.findById(anyLong())).thenReturn(Mono.just(product));
+        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.just(cart));
 
-        when(productRepository.save(any())).thenReturn(null);
-        when(cartRepository.save(any())).thenReturn(null);
+        when(cartRepository.save(any())).thenReturn(Mono.just(cart));
 
-        cartService.addToCart(10L);
+        Mono<Void> result = cartService.addToCart(10L);
+
+        StepVerifier.create(result)
+                .verifyComplete();
 
         verify(productRepository).findById(10L);
+        verify(productRepository, never()).decreaseById(anyLong(), anyInt());
         verify(cartRepository, never()).findCartByProductId(anyLong());
-
-        verify(productRepository, never()).save(any());
 
         verify(cartRepository, never()).save(any());
     }
 
     @Test
     void removeFromCart() {
-        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
-        Cart cart = new Cart(20L, product, 2);
+        Cart cart = new Cart(20L, 10L, 2);
 
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Optional.of(cart));
+        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.just(cart));
+        when(productRepository.increaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
 
-        when(productRepository.save(any())).thenReturn(null);
-        when(cartRepository.save(any())).thenReturn(null);
+        when(cartRepository.save(any())).thenReturn(Mono.just(cart));
 
-        cartService.removeFromCart(10L);
+        Mono<Void> result = cartService.removeFromCart(10L);
 
-        verify(productRepository).findById(10L);
+        StepVerifier.create(result)
+                .verifyComplete();
+
         verify(cartRepository).findCartByProductId(10L);
-
-        product.setStock(product.getStock() + 1);
-        verify(productRepository).save(product);
 
         cart.setQuantity(cart.getQuantity() - 1);
         verify(cartRepository).save(cart);
+        verify(productRepository).increaseById(10L, 1);
     }
 
     @Test
     void removeFromCartLastProduct() {
-        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
-        Cart cart = new Cart(20L, product, 1);
+        Cart cart = new Cart(20L, 10L, 1);
 
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Optional.of(cart));
+        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.just(cart));
+        when(productRepository.increaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
 
-        when(productRepository.save(any())).thenReturn(null);
-        when(cartRepository.save(any())).thenReturn(null);
-        doNothing().when(cartRepository).delete(any());
+        when(cartRepository.save(any())).thenReturn(Mono.just(cart));
+        when(cartRepository.delete(any())).thenReturn(Mono.empty());
 
-        cartService.removeFromCart(10L);
+        Mono<Void> result = cartService.removeFromCart(10L);
 
-        verify(productRepository).findById(10L);
+        StepVerifier.create(result)
+                .verifyComplete();
+
         verify(cartRepository).findCartByProductId(10L);
-
-        product.setStock(product.getStock() + 1);
-        verify(productRepository).save(product);
 
         verify(cartRepository).delete(cart);
         verify(cartRepository, never()).save(any());
+        verify(productRepository).increaseById(10L, 1);
     }
 
     @Test
     void removeFromCartNonExistsProduct() {
-        Product product = new Product(10L, "product", "desc", 12.34, "url", 15, null);
+        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.empty());
 
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Optional.empty());
+        when(cartRepository.save(any())).thenReturn(Mono.just(new Cart()));
 
-        when(productRepository.save(any())).thenReturn(null);
-        when(cartRepository.save(any())).thenReturn(null);
-        doNothing().when(cartRepository).delete(any());
+        Mono<Void> result = cartService.removeFromCart(10L);
 
-        cartService.removeFromCart(10L);
+        StepVerifier.create(result)
+                .verifyComplete();
 
-        verify(productRepository).findById(10L);
         verify(cartRepository).findCartByProductId(10L);
 
-        verify(productRepository, never()).save(any());
-
         verify(cartRepository, never()).save(any());
+        verify(productRepository, never()).increaseById(anyLong(), anyInt());
     }
 }

@@ -1,18 +1,17 @@
 package com.store.service;
 
 import com.store.dto.CartDto;
+import com.store.dto.ProductDto;
 import com.store.entity.Cart;
-import com.store.entity.Product;
 import com.store.mapper.CartMapper;
+import com.store.mapper.ProductMapper;
 import com.store.repository.CartRepository;
 import com.store.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class CartService {
@@ -26,77 +25,70 @@ public class CartService {
     @Autowired
     CartMapper cartMapper;
 
-    public List<CartDto> findAll() {
-        return cartRepository.findAll().stream()
-                .map(cartMapper::toCartDto)
-                .collect(Collectors.toList());
+    @Autowired
+    ProductMapper productMapper;
+
+    public Flux<CartDto> findAll() {
+        return cartRepository.findAll()
+                .flatMap(cart -> productRepository.findById(cart.getProductId())
+                        .map(product -> {
+                            ProductDto productDto = productMapper.toProductDto(product);
+
+                            return cartMapper.toCartDto(cart, productDto);
+                        }));
     }
 
     @Transactional
-    public void clearCart() {
-        List<Cart> cartList = cartRepository.findAll();
-        cartList.forEach(cart -> {
-            cart.getProduct().setStock(cart.getProduct().getStock() + cart.getQuantity());
-            cart.getProduct().setCarts(null);
-        });
-        cartRepository.deleteAll(cartList);
+    public Mono<Void> clearCart() {
+        return cartRepository.findAll()
+                .map(cart -> productRepository.increaseById(cart.getProductId(), cart.getQuantity()).subscribe())
+                .then(cartRepository.deleteAll());
     }
 
     @Transactional
-    public void removeProduct(Long productId) {
-        Optional<Cart> cartProduct = cartRepository.findCartByProductId(productId);
-        cartProduct.ifPresent(cart -> {
-            cart.getProduct().setStock(cart.getProduct().getStock() + cart.getQuantity());
-            cart.getProduct().setCarts(null);
-            cartRepository.delete(cart);
-        });
+    public Mono<Void> removeProduct(Long productId) {
+        return cartRepository.findCartByProductId(productId)
+                .map(cart -> productRepository.increaseById(productId, cart.getQuantity()).subscribe())
+                .then(cartRepository.deleteByProductId(productId)).then();
     }
 
     @Transactional
-    public void addToCart(Long productId) {
-        Optional<Product> rawProduct = productRepository.findById(productId);
-        if (rawProduct.isEmpty() || rawProduct.get().getStock() == 0) {
-            return;
-        }
-        Product product = rawProduct.get();
+    public Mono<Void> addToCart(Long productId) {
+        return productRepository.findById(productId)
+                .flatMap(product -> {
+                    if (product.getStock() <= 0) {
+                        return Mono.empty();
+                    }
 
-        Cart cart;
-        Optional<Cart> cartProduct = cartRepository.findCartByProductId(productId);
-
-        if (cartProduct.isPresent()) {
-            cart = cartProduct.get();
-            cart.setQuantity(cart.getQuantity() + 1);
-        } else {
-            cart = new Cart();
-            cart.setProduct(product);
-            cart.setQuantity(1);
-        }
-
-        product.setStock(product.getStock() - 1);
-        productRepository.save(product);
-
-        cartRepository.save(cart);
+                    return productRepository.decreaseById(productId, 1)
+                            .then(cartRepository.findCartByProductId(productId))
+                            .flatMap(existingCart -> {
+                                existingCart.setQuantity(existingCart.getQuantity() + 1);
+                                return cartRepository.save(existingCart);
+                            })
+                            .switchIfEmpty(Mono.defer(() -> {
+                                Cart cart = new Cart();
+                                cart.setProductId(productId);
+                                cart.setQuantity(1);
+                                return cartRepository.save(cart);
+                            }));
+                })
+                .then();
     }
 
     @Transactional
-    public void removeFromCart(Long productId) {
-        Optional<Product> rawProduct = productRepository.findById(productId);
-        Optional<Cart> rawCart = cartRepository.findCartByProductId(productId);
-        if (rawProduct.isEmpty() || rawCart.isEmpty()) {
-            return;
-        }
-        Product product = rawProduct.get();
-        Cart cart = rawCart.get();
-
-        if (cart.getQuantity() == 1) {
-            product.setCarts(null);
-            cartRepository.delete(cart);
-        } else {
-            cart.setQuantity(cart.getQuantity() - 1);
-            cartRepository.save(cart);
-        }
-
-        product.setStock(product.getStock() + 1);
-        productRepository.save(product);
+    public Mono<Void> removeFromCart(Long productId) {
+        return cartRepository.findCartByProductId(productId)
+                .flatMap(cart -> {
+                    if (cart.getQuantity() == 1) {
+                        return cartRepository.delete(cart)
+                                .then(productRepository.increaseById(productId, 1));
+                    } else {
+                        cart.setQuantity(cart.getQuantity() - 1);
+                        return cartRepository.save(cart)
+                                .then(productRepository.increaseById(productId, 1));
+                    }
+                })
+                .then();
     }
 }

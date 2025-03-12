@@ -1,20 +1,17 @@
 package com.store.mapper;
 
 import com.store.dto.CartDto;
+import com.store.dto.ProductDto;
 import com.store.entity.Cart;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CartMapper {
 
-    @Autowired
-    ProductMapper productMapper;
-
-    public CartDto toCartDto(Cart cart) {
+    public CartDto toCartDto(Cart cart, ProductDto productDto) {
         return new CartDto(
                 cart.getId(),
-                productMapper.toProductDto(cart.getProduct()),
+                productDto,
                 cart.getQuantity()
         );
     }
@@ -22,7 +19,7 @@ public class CartMapper {
     public Cart toCart(CartDto cartDto) {
         Cart cart = new Cart();
         cart.setId(cartDto.id());
-        cart.setProduct(productMapper.toProduct(cartDto.product()));
+        cart.setProductId(cartDto.product().id());
         cart.setQuantity(cartDto.quantity());
         return cart;
     }

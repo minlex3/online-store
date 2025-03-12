@@ -1,14 +1,18 @@
 package com.store.service;
 
-import com.store.entity.Cart;
 import com.store.entity.Order;
 import com.store.entity.OrderItem;
+import com.store.mapper.CartMapper;
+import com.store.mapper.ProductMapper;
 import com.store.repository.CartRepository;
 import com.store.repository.OrderItemRepository;
 import com.store.repository.OrderRepository;
+import com.store.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -24,40 +28,56 @@ public class PurchaseService {
     @Autowired
     OrderItemRepository orderItemRepository;
 
-    public Boolean isPurchaseAllowed() {
-        List<Cart> allCartItems = cartRepository.findAll();
-        return !allCartItems.isEmpty();
-    }
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private CartMapper cartMapper;
+
+    @Autowired
+    private ProductMapper productMapper;
 
     @Transactional
-    public Long makePurchase() {
-        List<Cart> allCartItems = cartRepository.findAll();
-        if (allCartItems.isEmpty()) {
-            return 0L;
-        }
+    public Mono<Long> makePurchase() {
+        return cartRepository.findAll()
+                .collectList()
+                .flatMap(cartItems -> {
+                    if (cartItems.isEmpty()) {
+                        return Mono.error(new RuntimeException("Cart is empty"));
+                    }
 
-        double total = allCartItems.stream()
-                .mapToDouble(cart -> cart.getQuantity() * cart.getProduct().getPrice())
-                .sum();
+                    return Flux.fromIterable(cartItems)
+                            .flatMap(cartItem -> productRepository.findById(cartItem.getProductId())
+                                    .map(product -> cartMapper.toCartDto(cartItem, productMapper.toProductDto(product))))
+                            .collectList()
+                            .flatMap(cartDtos -> {
+                                double total = cartDtos.stream()
+                                        .mapToDouble(cartDto -> cartDto.quantity() * cartDto.product().price())
+                                        .sum();
+                                Order order = new Order();
+                                order.setTotalAmount(total);
+                                order.setStatus("Оплачен");
 
-        Order order = new Order();
-        order.setTotalAmount(total);
-        order.setStatus("Оплачен");
-        orderRepository.save(order);
+                                return orderRepository.save(order)
+                                        .doOnNext(System.out::println)
+                                        .flatMap(savedOrder -> {
+                                            List<OrderItem> orderItems = cartDtos.stream()
+                                                    .map(cartDto -> {
+                                                        OrderItem orderItem = new OrderItem();
+                                                        orderItem.setOrderId(savedOrder.getId());
+                                                        orderItem.setProductId(cartDto.product().id());
+                                                        orderItem.setQuantity(cartDto.quantity());
+                                                        orderItem.setPrice(cartDto.product().price());
+                                                        return orderItem;
+                                                    })
+                                                    .toList();
 
-        allCartItems.forEach(cart -> {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(order);
-            orderItem.setProduct(cart.getProduct());
-            orderItem.setQuantity(cart.getQuantity());
-            orderItem.setPrice(cart.getProduct().getPrice());
-            orderItemRepository.save(orderItem);
+                                            return orderItemRepository.saveAll(orderItems)
+                                                    .then(cartRepository.deleteAll())
+                                                    .then(Mono.just(savedOrder.getId()));
+                                        });
+                            });
 
-            cart.getProduct().setCarts(null);
-        });
-
-        cartRepository.deleteAll();
-
-        return order.getId();
+                });
     }
 }

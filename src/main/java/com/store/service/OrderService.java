@@ -1,15 +1,17 @@
 package com.store.service;
 
 import com.store.dto.OrderDto;
-import com.store.entity.Order;
+import com.store.dto.ProductDto;
+import com.store.mapper.OrderItemMapper;
 import com.store.mapper.OrderMapper;
+import com.store.mapper.ProductMapper;
+import com.store.repository.OrderItemRepository;
 import com.store.repository.OrderRepository;
+import com.store.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class OrderService {
@@ -18,16 +20,43 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
     private OrderMapper orderMapper;
 
-    public List<OrderDto> findAll() {
-        return orderRepository.findAll().stream()
-                .map(orderMapper::toOrderDto)
-                .collect(Collectors.toList());
+    @Autowired
+    private OrderItemMapper orderItemMapper;
+
+    @Autowired
+    private ProductMapper productMapper;
+
+    public Flux<OrderDto> findAll() {
+        return orderRepository.findAll()
+                .flatMap(order -> orderItemRepository.findAllByOrderId(order.getId())
+                        .flatMap(orderItem -> productRepository.findById(orderItem.getProductId())
+                                .map(product -> {
+                                    ProductDto productDto = productMapper.toProductDto(product);
+
+                                    return orderItemMapper.toOrderItemDto(orderItem, productDto);
+                                }))
+                        .collectList()
+                        .map(orderItems -> orderMapper.toOrderDto(order, orderItems)));
     }
 
-    public OrderDto findById(Long id) {
-        Optional<Order> order = orderRepository.findById(id);
-        return order.map(value -> orderMapper.toOrderDto(value)).orElse(null);
+    public Mono<OrderDto> findById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .flatMap(order -> orderItemRepository.findAllByOrderId(order.getId())
+                        .flatMap(orderItem -> productRepository.findById(orderItem.getProductId())
+                                .map(product -> {
+                                    ProductDto productDto = productMapper.toProductDto(product);
+
+                                    return orderItemMapper.toOrderItemDto(orderItem, productDto);
+                                }))
+                        .collectList()
+                        .map(orderItems -> orderMapper.toOrderDto(order, orderItems)));
     }
 }
