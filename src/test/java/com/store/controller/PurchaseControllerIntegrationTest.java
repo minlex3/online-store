@@ -14,10 +14,11 @@ public class PurchaseControllerIntegrationTest {
     private WebTestClient webTestClient;
 
     @Test
-    void makePurchase() throws Exception {
+    void makePurchase() {
         webTestClient.post()
                 .uri("/purchase")
                 .exchange()
+                .expectHeader().location("/orders/3")
                 .expectStatus().is3xxRedirection();
     }
 }

@@ -44,7 +44,7 @@ public class ProductControllerIntegrationTest {
         formData.add("name", "name");
         formData.add("description", "desc");
         formData.add("price", "12.34");
-        formData.add("url", "url");
+        formData.add("imageUrl", "url");
         formData.add("stock", "10");
         formData.add("cartQuantity", "0");
 
@@ -53,6 +53,7 @@ public class ProductControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(fromFormData(formData))
                 .exchange()
+                .expectHeader().location("/products")
                 .expectStatus().is3xxRedirection();
     }
 }

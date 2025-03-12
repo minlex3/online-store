@@ -1,88 +1,90 @@
-//package com.store.controller;
-//
-//import com.store.dto.ProductDto;
-//import com.store.service.ProductService;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.PageImpl;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.test.context.bean.override.mockito.MockitoBean;
-//import org.springframework.test.web.servlet.MockMvc;
-//
-//import java.util.List;
-//
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.ArgumentMatchers.anyInt;
-//import static org.mockito.Mockito.*;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-//
-//@WebMvcTest(ProductController.class)
-//public class ProductControllerTest {
-//
-//    @Autowired
-//    private MockMvc mockMvc;
-//
-//    @MockitoBean
-//    private ProductService productService;
-//
-//    @Test
-//    void getAllProducts() throws Exception {
-//        Page<ProductDto> expected = new PageImpl<>(List.of(
-//                new ProductDto(100L, "product1", "desc", 10.56, "url", 8, 0),
-//                new ProductDto(200L, "product2", "desc2", 10.57, "url2", 9, 0)
-//        ), PageRequest.of(0, 10), 1);
-//
-//        when(productService.findAll(anyInt(), anyInt(), any(), any())).thenReturn(expected);
-//
-//        mockMvc.perform(get("/products"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("text/html;charset=UTF-8"))
-//                .andExpect(view().name("products-list"))
-//                .andExpect(model().attributeExists("products"))
-//                .andExpect(xpath("//div[5]/div").nodeCount(2))
-//                .andExpect(xpath("//div[5]/div[1]/h3[1]/a[1]").string("product1"))
-//                .andExpect(xpath("//div[5]/div[2]/h3[1]/a[1]").string("product2"));
-//
-//        verify(productService).findAll(0, 10, "", "name");
-//    }
-//
-//    @Test
-//    void getProductById() throws Exception {
-//        ProductDto expected = new ProductDto(100L, "product1", "desc", 10.56, "url", 8, 0);
-//
-//        when(productService.findById(any())).thenReturn(expected);
-//
-//        mockMvc.perform(get("/products/100"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("text/html;charset=UTF-8"))
-//                .andExpect(view().name("product-description"))
-//                .andExpect(model().attributeExists("product"))
-//                .andExpect(xpath("//h2[1]").string("product1"));
-//
-//        verify(productService).findById(100L);
-//    }
-//
-//    @Test
-//    void saveProduct() throws Exception {
-//        doNothing().when(productService).save(any());
-//
-//        mockMvc.perform(post("/products")
-//                        .param("name", "productName")
-//                        .param("description", "desc")
-//                        .param("price", "10.1")
-//                        .param("imageUrl", "url")
-//                        .param("stock", "10")
-//                        .param("cartQuantity", "0")
-//                )
-//                .andExpect(status().is3xxRedirection())
-//                .andExpect(redirectedUrl("/products"));
-//
-//        verify(productService).save(
-//                new ProductDto(null, "productName", "desc", 10.1, "url", 10, 0)
-//        );
-//    }
-//}
+package com.store.controller;
+
+import com.store.dto.PageResponse;
+import com.store.dto.ProductDto;
+import com.store.service.ProductService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.LinkedMultiValueMap;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.web.reactive.function.BodyInserters.fromFormData;
+
+@WebFluxTest(ProductController.class)
+public class ProductControllerTest {
+
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @MockitoBean
+    private ProductService productService;
+
+    @Test
+    void getAllProducts() {
+        PageResponse<ProductDto> expected = new PageResponse<>(List.of(
+                new ProductDto(100L, "product1", "desc", 10.56, "url", 8, 0),
+                new ProductDto(200L, "product2", "desc2", 10.57, "url2", 9, 0)
+        ), 2);
+
+        when(productService.searchProducts(anyInt(), anyInt(), any(), any())).thenReturn(Mono.just(expected));
+
+        webTestClient.get()
+                .uri("/products")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().xpath("//div[5]/div").nodeCount(2)
+                .xpath("//div[5]/div[1]/h3[1]/a[1]", "product1");
+
+        verify(productService).searchProducts(0, 10, "", "name");
+    }
+
+    @Test
+    void getProductById() {
+        ProductDto expected = new ProductDto(100L, "product1", "desc", 10.56, "url", 8, 0);
+
+        when(productService.findById(any())).thenReturn(Mono.just(expected));
+
+        webTestClient.get()
+                .uri("/products/100")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().xpath("//h2[1]", "product1");
+
+        verify(productService).findById(100L);
+    }
+
+    @Test
+    void saveProduct() {
+        when(productService.save(any())).thenReturn(Mono.empty());
+
+        LinkedMultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("name", "name");
+        formData.add("description", "desc");
+        formData.add("price", "12.34");
+        formData.add("imageUrl", "url");
+        formData.add("stock", "10");
+        formData.add("cartQuantity", "0");
+
+        webTestClient.post()
+                .uri("/products")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(fromFormData(formData))
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().location("/products");
+
+        verify(productService).save(
+                new ProductDto(null, "name", "desc", 12.34, "url", 10, 0)
+        );
+    }
+}

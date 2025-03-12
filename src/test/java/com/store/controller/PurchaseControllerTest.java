@@ -1,49 +1,48 @@
-//package com.store.controller;
-//
-//import com.store.service.PurchaseService;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-//import org.springframework.test.context.bean.override.mockito.MockitoBean;
-//import org.springframework.test.web.servlet.MockMvc;
-//
-//import static org.mockito.Mockito.*;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-//
-//@WebMvcTest(PurchaseController.class)
-//public class PurchaseControllerTest {
-//
-//    @Autowired
-//    private MockMvc mockMvc;
-//
-//    @MockitoBean
-//    private PurchaseService purchaseService;
-//
-//    @Test
-//    void makeAllowedPurchase() throws Exception {
-//        when(purchaseService.isPurchaseAllowed()).thenReturn(true);
-//        when(purchaseService.makePurchase()).thenReturn(10L);
-//
-//        mockMvc.perform(post("/purchase"))
-//                .andExpect(status().is3xxRedirection())
-//                .andExpect(redirectedUrl("/orders/10"));
-//
-//        verify(purchaseService).isPurchaseAllowed();
-//        verify(purchaseService).makePurchase();
-//    }
-//
-//    @Test
-//    void makeNotAllowedPurchase() throws Exception {
-//        when(purchaseService.isPurchaseAllowed()).thenReturn(false);
-//        when(purchaseService.makePurchase()).thenReturn(10L);
-//
-//        mockMvc.perform(post("/purchase"))
-//                .andExpect(status().is3xxRedirection())
-//                .andExpect(redirectedUrl("/cart"));
-//
-//        verify(purchaseService).isPurchaseAllowed();
-//        verify(purchaseService, never()).makePurchase();
-//    }
-//}
+package com.store.controller;
+
+import com.store.service.PurchaseService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@WebFluxTest(PurchaseController.class)
+public class PurchaseControllerTest {
+
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @MockitoBean
+    private PurchaseService purchaseService;
+
+    @Test
+    void makeAllowedPurchase() {
+        when(purchaseService.makePurchase()).thenReturn(Mono.just(10L));
+
+        webTestClient.post()
+                .uri("/purchase")
+                .exchange()
+                .expectHeader().location("/orders/10")
+                .expectStatus().is3xxRedirection();
+
+        verify(purchaseService).makePurchase();
+    }
+
+    @Test
+    void makeNotAllowedPurchase() {
+        when(purchaseService.makePurchase()).thenReturn(Mono.error(new RuntimeException("exception")));
+
+        webTestClient.post()
+                .uri("/purchase")
+                .exchange()
+                .expectHeader().location("/cart")
+                .expectStatus().is3xxRedirection();
+
+        verify(purchaseService).makePurchase();
+    }
+}
