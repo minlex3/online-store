@@ -1,6 +1,7 @@
 package com.store.service;
 
 import com.store.dto.CartDto;
+import com.store.dto.PageResponse;
 import com.store.dto.ProductDto;
 import com.store.entity.Cart;
 import com.store.mapper.CartMapper;
@@ -8,6 +9,7 @@ import com.store.mapper.ProductMapper;
 import com.store.repository.CartRepository;
 import com.store.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -28,6 +30,9 @@ public class CartService {
     @Autowired
     ProductMapper productMapper;
 
+    @Autowired
+    private ReactiveRedisTemplate<String, ProductDto> redisProductTemplate;
+
     public Flux<CartDto> findAll() {
         return cartRepository.findAll()
                 .flatMap(cart -> productRepository.findById(cart.getProductId())
@@ -42,14 +47,17 @@ public class CartService {
     public Mono<Void> clearCart() {
         return cartRepository.findAll()
                 .map(cart -> productRepository.increaseById(cart.getProductId(), cart.getQuantity()).subscribe())
-                .then(cartRepository.deleteAll());
+                .then(cartRepository.deleteAll())
+                .then(evictAllProductsCache());
     }
 
     @Transactional
     public Mono<Void> removeProduct(Long productId) {
         return cartRepository.findCartByProductId(productId)
                 .map(cart -> productRepository.increaseById(productId, cart.getQuantity()).subscribe())
-                .then(cartRepository.deleteByProductId(productId)).then();
+                .then(cartRepository.deleteByProductId(productId))
+                .then(evictAllProductsCache())
+                .then();
     }
 
     @Transactional
@@ -73,6 +81,7 @@ public class CartService {
                                 return cartRepository.save(cart);
                             }));
                 })
+                .then(evictAllProductsCache())
                 .then();
     }
 
@@ -89,6 +98,13 @@ public class CartService {
                                 .then(productRepository.increaseById(productId, 1));
                     }
                 })
+                .then(evictAllProductsCache())
+                .then();
+    }
+
+    public Mono<Void> evictAllProductsCache() {
+        return redisProductTemplate.keys("store:products:*")
+                .flatMap(redisProductTemplate::delete)
                 .then();
     }
 }

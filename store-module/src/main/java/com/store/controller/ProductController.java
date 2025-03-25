@@ -29,7 +29,7 @@ public class ProductController {
     ) {
         return productService.searchProducts(page - 1, size, filter, sortBy)
                 .doOnNext(response -> {
-                    long totalPages = response.getTotalElements();
+                    long totalPages = response.totalElements();
                     if (totalPages > 0) {
                         List<Long> pageNumbers = LongStream.rangeClosed(1L, totalPages)
                                 .boxed()
@@ -37,10 +37,10 @@ public class ProductController {
                         model.addAttribute("pageNumbers", pageNumbers);
                     }
 
-                    model.addAttribute("products", response.getData());
+                    model.addAttribute("products", response.data());
                     model.addAttribute("page", page);
                     model.addAttribute("size", size);
-                    model.addAttribute("totalPages", (int) Math.ceil((double) response.getTotalElements() / size));
+                    model.addAttribute("totalPages", (int) Math.ceil((double) response.totalElements() / size));
 
                     model.addAttribute("filter", filter);
                     model.addAttribute("sortBy", sortBy);
