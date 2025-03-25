@@ -45,6 +45,7 @@
             border: none;
             color: white;
             padding: 15px 32px;
+            margin: 5px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
@@ -60,7 +61,7 @@
             border: none;
             color: white;
             padding: 15px 32px;
-            margin: 10px;
+            margin: 5px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
@@ -117,10 +118,14 @@
 
 <div>
     <h3 th:text="'Итого: ' + ${total}"></h3>
+    <h4 th:text="${balance != null ? 'Баланс: ' + balance : 'Сервис оплаты не доступен'}"></h4>
     <div class="header-container">
         <div class="left-forms">
             <form th:action="@{/purchase}" method="post">
-                <button class="button" type="submit">Сделать заказ</button>
+                <button th:class="${total > balance} ? 'button-delete' : 'button'"
+                        th:disabled="${total > balance}"
+                        th:title="${total > balance} ? 'Недостаточно средств' : 'Подтвердить покупку'"
+                        type="submit">Сделать заказ</button>
             </form>
         </div>
         <div class="right-forms">

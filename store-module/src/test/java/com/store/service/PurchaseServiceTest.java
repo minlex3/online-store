@@ -4,6 +4,7 @@ import com.store.OnlineStoreApplication;
 import com.store.entity.Cart;
 import com.store.entity.Order;
 import com.store.entity.Product;
+import com.store.payment.client.model.Balance;
 import com.store.repository.CartRepository;
 import com.store.repository.OrderItemRepository;
 import com.store.repository.OrderRepository;
@@ -34,6 +35,9 @@ public class PurchaseServiceTest {
     @MockitoBean
     private CartRepository cartRepository;
 
+    @MockitoBean
+    private PaymentService paymentService;
+
     @Autowired
     private PurchaseService purchaseService;
 
@@ -51,6 +55,8 @@ public class PurchaseServiceTest {
         when(orderRepository.save(any())).thenReturn(Mono.just(new Order(20L, 123.4, "paid")));
         when(orderItemRepository.saveAll(anyList())).thenReturn(Flux.empty());
         when(cartRepository.deleteAll()).thenReturn(Mono.empty());
+
+        when(paymentService.makePurchase(any())).thenReturn(Mono.just(new Balance()));
 
         Mono<Long> result = purchaseService.makePurchase();
 

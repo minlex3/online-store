@@ -2,7 +2,9 @@ package com.store.controller;
 
 import com.store.dto.CartDto;
 import com.store.dto.ProductDto;
+import com.store.payment.client.model.Balance;
 import com.store.service.CartService;
+import com.store.service.PaymentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -24,6 +26,9 @@ public class CartControllerTest {
     @MockitoBean
     private CartService cartService;
 
+    @MockitoBean
+    private PaymentService paymentService;
+
     @Test
     void getAllProducts() {
         List<CartDto> expected = List.of(
@@ -34,6 +39,7 @@ public class CartControllerTest {
                 )
         );
 
+        when(paymentService.getBalance()).thenReturn(Mono.just(new Balance()));
         when(cartService.findAll()).thenReturn(Flux.fromIterable(expected));
 
         webTestClient.get()
@@ -48,6 +54,7 @@ public class CartControllerTest {
     @Test
     void addToCart() {
         when(cartService.addToCart(anyLong())).thenReturn(Mono.empty());
+        when(paymentService.getBalance()).thenReturn(Mono.just(new Balance()));
 
         webTestClient.post()
                 .uri("/cart/add/1/products")
@@ -61,6 +68,7 @@ public class CartControllerTest {
     @Test
     void removeFromCart() {
         when(cartService.removeFromCart(anyLong())).thenReturn(Mono.empty());
+        when(paymentService.getBalance()).thenReturn(Mono.just(new Balance()));
 
         webTestClient.post()
                 .uri("/cart/remove/1/products")
@@ -74,6 +82,7 @@ public class CartControllerTest {
     @Test
     void removeProductFromCart() {
         when(cartService.removeProduct(anyLong())).thenReturn(Mono.empty());
+        when(paymentService.getBalance()).thenReturn(Mono.just(new Balance()));
 
         webTestClient.post()
                 .uri("/cart/clear/1/products")

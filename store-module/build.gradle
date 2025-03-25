@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.openapi.generator' version '7.3.0'
 }
 
 group = 'com.store'
@@ -39,6 +40,28 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
 
+openApiGenerate {
+    generatorName.set("java")
+    inputSpec.set("${project.rootDir}/payment-module/src/main/resources/api-spec.yaml")
+    outputDir.set("$projectDir/build/generated")
+    apiPackage.set("com.store.payment.client.api")
+    modelPackage.set("com.store.payment.client.model")
+    configOptions.set([
+            hideGenerationTimestamp: "true",
+            library                : "webclient",
+            useJakartaEe           : "true",
+            useTags                : "true",
+            openApiNullable        : "false",
+            serializableModel      : "true"
+    ])
+}
+
+sourceSets.main.java.srcDir "$projectDir/build/generated/src/main/java"
+
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('compileJava') {
+    dependsOn(tasks.openApiGenerate)
 }

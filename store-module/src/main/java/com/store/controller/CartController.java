@@ -1,6 +1,9 @@
 package com.store.controller;
 
+import com.store.dto.CartDto;
+import com.store.payment.client.model.Balance;
 import com.store.service.CartService;
+import com.store.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/cart")
 public class CartController {
@@ -17,17 +22,26 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
+    @Autowired
+    private PaymentService paymentService;
+
     @GetMapping
     public Mono<String> findAll(Model model) {
-        return cartService.findAll()
-                .collectList()
-                .map(cartList -> {
+        return Mono.zip(
+                        cartService.findAll().collectList(),
+                        paymentService.getBalance()
+                )
+                .map(tuple -> {
+                    List<CartDto> cartList = tuple.getT1();
+                    Balance balance = tuple.getT2();
+
                     double total = cartList.stream()
                             .mapToDouble(cartDto -> cartDto.quantity() * cartDto.product().price())
                             .sum();
 
                     model.addAttribute("cart", cartList);
                     model.addAttribute("total", total);
+                    model.addAttribute("balance", balance.getBalance());
 
                     return "cart-list";
                 });

@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info:
+  title: payment-module
+  description: API for the payment gateway to the store
+  version: 1.0.0
+paths:
+  /api/balance:
+    get:
+      summary: get a balance
+      responses:
+        '200':
+          description: getting a balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+  /api/purchase:
+    post:
+      summary: make purchase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseInfo'
+      responses:
+        '201':
+          description: Successful purchase
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+        '400':
+          description: Unsuccessful purchase
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+components:
+  schemas:
+    Balance:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          example: 1530.40
+      required:
+        - balance
+    PurchaseInfo:
+      type: object
+      properties:
+        totalAmount:
+          type: number
+          format: double
+          example: 45.56
+        discountAmount:
+          type: number
+          format: double
+          example: 2.56
+      required:
+        - totalAmount
+        - discountAmount
