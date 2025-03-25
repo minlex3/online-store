@@ -31,7 +31,7 @@ public class CartService {
     ProductMapper productMapper;
 
     @Autowired
-    private ReactiveRedisTemplate<String, ProductDto> redisProductTemplate;
+    private ReactiveRedisTemplate<String, PageResponse> redisPageTemplate;
 
     public Flux<CartDto> findAll() {
         return cartRepository.findAll()
@@ -103,8 +103,8 @@ public class CartService {
     }
 
     public Mono<Void> evictAllProductsCache() {
-        return redisProductTemplate.keys("store:products:*")
-                .flatMap(redisProductTemplate::delete)
+        return redisPageTemplate.keys("store:products:*")
+                .flatMap(redisPageTemplate::delete)
                 .then();
     }
 }

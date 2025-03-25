@@ -31,10 +31,10 @@ public class ProductControllerTest {
 
     @Test
     void getAllProducts() {
-        PageResponse<ProductDto> expected = new PageResponse<>(List.of(
+        PageResponse expected = new PageResponse(List.of(
                 new ProductDto(100L, "product1", "desc", 10.56, "url", 8, 0),
                 new ProductDto(200L, "product2", "desc2", 10.57, "url2", 9, 0)
-        ), 2);
+        ), 2L);
 
         when(productService.searchProducts(anyInt(), anyInt(), any(), any())).thenReturn(Mono.just(expected));
 

@@ -57,13 +57,13 @@ public class ProductService {
         String cacheName = "store:products:" + page + ":" + size + ":" + name + ":" + sortField;
 
         return redisPageTemplate.opsForValue().get(cacheName)
-                .switchIfEmpty(
-                        searchProductsInDB(page, size, name, sortField)
-                                .flatMap(response ->
-                                        redisPageTemplate.opsForValue()
-                                                .set(cacheName, response, Duration.ofMinutes(1))
-                                                .thenReturn(response)
-                                )
+                .switchIfEmpty(Mono.defer(() -> searchProductsInDB(page, size, name, sortField)
+                        .flatMap(response ->
+                                redisPageTemplate.opsForValue()
+                                        .set(cacheName, response, Duration.ofMinutes(1))
+                                        .thenReturn(response)
+                        ))
+
                 );
     }
 
@@ -71,14 +71,15 @@ public class ProductService {
         String cacheName = "store:product:";
 
         return redisProductTemplate.opsForValue().get(cacheName + id)
-                .switchIfEmpty(
-                        productRepository.findById(id)
+                .switchIfEmpty(Mono.defer(() -> productRepository.findById(id)
                                 .map(productMapper::toProductDto)
                                 .flatMap(productDto ->
                                         redisProductTemplate.opsForValue()
                                                 .set(cacheName + id, productDto, Duration.ofMinutes(1))
                                                 .thenReturn(productDto)
                                 )
+                        )
+
                 );
     }
 
@@ -92,8 +93,8 @@ public class ProductService {
     }
 
     public Mono<Void> evictAllProductsCache() {
-        return redisProductTemplate.keys("store:products:*")
-                .flatMap(redisProductTemplate::delete)
+        return redisPageTemplate.keys("store:products:*")
+                .flatMap(redisPageTemplate::delete)
                 .then();
     }
 }
