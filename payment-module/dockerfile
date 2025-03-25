@@ -1,0 +1,14 @@
+# Используем базовый образ с Java 21
+FROM eclipse-temurin:21-jre-alpine
+
+# Рабочая директория внутри контейнера
+WORKDIR /app
+
+# Копируем JAR-файл в контейнер
+COPY build/libs/payment-module-0.0.1-SNAPSHOT.jar app.jar
+
+# Открываем порт 8081 для доступа извне
+EXPOSE 8081
+
+# Команда для запуска приложения
+ENTRYPOINT ["java", "-jar", "app.jar"]
