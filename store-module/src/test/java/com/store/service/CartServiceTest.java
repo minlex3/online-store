@@ -1,6 +1,7 @@
 package com.store.service;
 
 import com.store.OnlineStoreApplication;
+import com.store.configuration.EmbeddedRedisConfiguration;
 import com.store.dto.CartDto;
 import com.store.entity.Cart;
 import com.store.entity.Product;
@@ -9,6 +10,9 @@ import com.store.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,7 +23,12 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = OnlineStoreApplication.class)
+@Import(EmbeddedRedisConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class CartServiceTest {
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @MockitoBean
     private CartRepository cartRepository;

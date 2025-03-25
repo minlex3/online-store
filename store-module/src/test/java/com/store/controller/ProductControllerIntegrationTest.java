@@ -1,10 +1,14 @@
 package com.store.controller;
 
+import com.store.configuration.EmbeddedRedisConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 
@@ -12,7 +16,12 @@ import static org.springframework.web.reactive.function.BodyInserters.fromFormDa
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@Import(EmbeddedRedisConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ProductControllerIntegrationTest {
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Autowired
     private WebTestClient webTestClient;
