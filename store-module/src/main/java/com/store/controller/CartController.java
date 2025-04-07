@@ -5,6 +5,8 @@ import com.store.payment.client.model.Balance;
 import com.store.service.CartService;
 import com.store.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,9 +28,9 @@ public class CartController {
     private PaymentService paymentService;
 
     @GetMapping
-    public Mono<String> findAll(Model model) {
+    public Mono<String> findAll(Model model, @AuthenticationPrincipal UserDetails user) {
         return Mono.zip(
-                        cartService.findAll().collectList(),
+                        cartService.findAll(user.getUsername()).collectList(),
                         paymentService.getBalance()
                 )
                 .map(tuple -> {
@@ -50,9 +52,10 @@ public class CartController {
     @PostMapping("/add/{id}/{redirect}")
     public Mono<String> addToCart(
             @PathVariable("id") Long id,
-            @PathVariable("redirect") String redirect
+            @PathVariable("redirect") String redirect,
+            @AuthenticationPrincipal UserDetails user
     ) {
-        return cartService.addToCart(id)
+        return cartService.addToCart(id, user.getUsername())
                 .thenReturn(switch (redirect) {
                     case "products" -> "redirect:/products";
                     case "product" -> "redirect:/products/" + id;
@@ -64,9 +67,10 @@ public class CartController {
     @PostMapping("/remove/{id}/{redirect}")
     public Mono<String> removeFromCart(
             @PathVariable("id") Long id,
-            @PathVariable("redirect") String redirect
+            @PathVariable("redirect") String redirect,
+            @AuthenticationPrincipal UserDetails user
     ) {
-        return cartService.removeFromCart(id)
+        return cartService.removeFromCart(id, user.getUsername())
                 .thenReturn(switch (redirect) {
                     case "products" -> "redirect:/products";
                     case "product" -> "redirect:/products/" + id;
@@ -78,9 +82,10 @@ public class CartController {
     @PostMapping("/clear/{id}/{redirect}")
     public Mono<String> removeProduct(
             @PathVariable("id") Long id,
-            @PathVariable("redirect") String redirect
+            @PathVariable("redirect") String redirect,
+            @AuthenticationPrincipal UserDetails user
     ) {
-        return cartService.removeProduct(id)
+        return cartService.removeProduct(id, user.getUsername())
                 .thenReturn(switch (redirect) {
                     case "products" -> "redirect:/products";
                     case "product" -> "redirect:/products/" + id;
@@ -90,8 +95,8 @@ public class CartController {
     }
 
     @PostMapping("/clear")
-    public Mono<String> clearCart() {
-        return cartService.clearCart()
+    public Mono<String> clearCart(@AuthenticationPrincipal UserDetails user) {
+        return cartService.clearCart(user.getUsername())
                 .thenReturn("redirect:/cart");
     }
 }

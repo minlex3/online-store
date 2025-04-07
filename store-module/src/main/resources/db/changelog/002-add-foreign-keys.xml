@@ -6,20 +6,40 @@
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <!-- Внешние ключи для таблицы cart -->
-    <changeSet id="8" author="minlex">
+    <changeSet id="208" author="minlex">
         <addForeignKeyConstraint
                 baseTableName="cart"
                 baseColumnNames="product_id"
                 constraintName="fk_cart_product"
                 referencedTableName="products"
                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="cart"
+                baseColumnNames="user_id"
+                constraintName="fk_cart_user"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
         <rollback>
             <dropAllForeignKeyConstraints baseTableName="fk_cart_product"/>
+            <dropAllForeignKeyConstraints baseTableName="fk_cart_user"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Внешние ключи для таблицы orders -->
+    <changeSet id="209" author="minlex">
+        <addForeignKeyConstraint
+                baseTableName="orders"
+                baseColumnNames="user_id"
+                constraintName="fk_order_user"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+        <rollback>
+            <dropAllForeignKeyConstraints baseTableName="fk_order_user"/>
         </rollback>
     </changeSet>
 
     <!-- Внешние ключи для таблицы order_items -->
-    <changeSet id="10" author="minlex">
+    <changeSet id="210" author="minlex">
         <addForeignKeyConstraint
                 baseTableName="order_items"
                 baseColumnNames="order_id"

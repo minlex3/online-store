@@ -82,7 +82,9 @@
           display: flex;
           gap: 10px;
         }
-        .right-form {
+        .right-forms {
+          display: flex;
+          gap: 10px;
           align-self: flex-end;
         }
         .cart-container {
@@ -108,6 +110,9 @@
         </form>
     </div>
     <div class="right-forms">
+        <form th:action="@{/logout}">
+            <button class="button-delete" type="submit">Выход</button>
+        </form>
         <form th:action="@{/cart}">
             <button class="button" type="submit">Корзина</button>
         </form>
