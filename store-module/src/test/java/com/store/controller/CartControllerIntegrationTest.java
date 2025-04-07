@@ -7,7 +7,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -21,6 +24,7 @@ public class CartControllerIntegrationTest {
     private WebTestClient webTestClient;
 
     @Test
+    @WithMockUser(username = "root")
     void getAllProducts() {
         webTestClient.get()
                 .uri("/cart")
@@ -31,8 +35,10 @@ public class CartControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void addToCartRedirectProducts() {
-        webTestClient.post()
+        webTestClient.mutateWith(csrf())
+                .post()
                 .uri("/cart/add/1/products")
                 .exchange()
                 .expectHeader().location("/products")
@@ -40,8 +46,10 @@ public class CartControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void addToCartRedirectProductId() {
-        webTestClient.post()
+        webTestClient.mutateWith(csrf())
+                .post()
                 .uri("/cart/add/1/product")
                 .exchange()
                 .expectHeader().location("/products/1")
@@ -49,8 +57,10 @@ public class CartControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void addToCartRedirectCart() {
-        webTestClient.post()
+        webTestClient.mutateWith(csrf())
+                .post()
                 .uri("/cart/add/1/cart")
                 .exchange()
                 .expectHeader().location("/cart")
@@ -58,8 +68,10 @@ public class CartControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void addToCartRedirectUnexpected() {
-        webTestClient.post()
+        webTestClient.mutateWith(csrf())
+                .post()
                 .uri("/cart/add/1/some")
                 .exchange()
                 .expectHeader().location("/products")
@@ -67,8 +79,10 @@ public class CartControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void removeFromCartRedirectProducts() {
-        webTestClient.post()
+        webTestClient.mutateWith(csrf())
+                .post()
                 .uri("/cart/remove/1/products")
                 .exchange()
                 .expectHeader().location("/products")
@@ -76,8 +90,10 @@ public class CartControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void removeFromCartRedirectProductId() {
-        webTestClient.post()
+        webTestClient.mutateWith(csrf())
+                .post()
                 .uri("/cart/remove/1/product")
                 .exchange()
                 .expectHeader().location("/products/1")
@@ -85,8 +101,10 @@ public class CartControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void removeFromCartRedirectCart() {
-        webTestClient.post()
+        webTestClient.mutateWith(csrf())
+                .post()
                 .uri("/cart/remove/1/cart")
                 .exchange()
                 .expectHeader().location("/cart")
@@ -94,8 +112,10 @@ public class CartControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void removeFromCartRedirectUnexpected() {
-        webTestClient.post()
+        webTestClient.mutateWith(csrf())
+                .post()
                 .uri("/cart/remove/1/some")
                 .exchange()
                 .expectHeader().location("/products")

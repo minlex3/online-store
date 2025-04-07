@@ -11,8 +11,8 @@ public interface CartRepository extends ReactiveCrudRepository<Cart, Long> {
 
     Mono<Cart> findCartByProductIdAndUserId(Long productId, Long userId);
 
-    @Query("DELETE FROM cart WHERE product_id = :productId")
-    Mono<Void> deleteByProductId(Long productId);
+    @Query("DELETE FROM cart WHERE product_id = :productId AND user_id = :userId")
+    Mono<Void> deleteByProductIdAndUserId(Long productId, Long userId);
 
     Flux<Cart> findAllByUserId(Long userId);
 }

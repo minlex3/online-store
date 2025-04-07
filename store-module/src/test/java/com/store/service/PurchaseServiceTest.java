@@ -45,14 +45,14 @@ public class PurchaseServiceTest {
     void makePurchase() {
         Product product = new Product(1L, "product", "desc", 12.34, "url", 15, 0);
         Product product2 = new Product(2L, "product", "desc", 12.34, "url", 15, 0);
-        Cart cart = new Cart(10L, 1L, 1);
-        Cart cart2 = new Cart(11L, 2L, 2);
+        Cart cart = new Cart(10L, 1L, 1, 1L);
+        Cart cart2 = new Cart(11L, 2L, 2, 1L);
 
         when(cartRepository.findAll()).thenReturn(Flux.just(cart, cart2));
         when(productRepository.findById(1L)).thenReturn(Mono.just(product));
         when(productRepository.findById(2L)).thenReturn(Mono.just(product2));
 
-        when(orderRepository.save(any())).thenReturn(Mono.just(new Order(20L, 123.4, "paid")));
+        when(orderRepository.save(any())).thenReturn(Mono.just(new Order(20L, 123.4, "paid", 1L)));
         when(orderItemRepository.saveAll(anyList())).thenReturn(Flux.empty());
         when(cartRepository.deleteAll()).thenReturn(Mono.empty());
 

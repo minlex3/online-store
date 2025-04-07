@@ -33,7 +33,7 @@ public class ProductControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .xpath("//div[5]/div").nodeCount(6)
+                .xpath("//div[5]/div").nodeCount(5)
                 .xpath("//div[5]/div[1]/h3[1]/a[1]", "Дрель-шуруповерт Makita CXT DF333DWAE");
     }
 

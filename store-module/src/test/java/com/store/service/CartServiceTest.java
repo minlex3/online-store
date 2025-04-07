@@ -5,8 +5,10 @@ import com.store.configuration.EmbeddedRedisConfiguration;
 import com.store.dto.CartDto;
 import com.store.entity.Cart;
 import com.store.entity.Product;
+import com.store.entity.UserData;
 import com.store.repository.CartRepository;
 import com.store.repository.ProductRepository;
+import com.store.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +33,9 @@ public class CartServiceTest {
     private RedisTemplate redisTemplate;
 
     @MockitoBean
+    private UserRepository userRepository;
+
+    @MockitoBean
     private CartRepository cartRepository;
 
     @MockitoBean
@@ -42,12 +47,13 @@ public class CartServiceTest {
     @Test
     void findAll() {
         Product product = new Product(10L, "product", "desc", 12.34, "url", 15, 0);
-        Cart cart = new Cart(10L, 10L, 2);
+        Cart cart = new Cart(10L, 10L, 2, 1L);
 
-        when(cartRepository.findAll()).thenReturn(Flux.just(cart));
+        when(cartRepository.findAllByUserId(anyLong())).thenReturn(Flux.just(cart));
         when(productRepository.findById(anyLong())).thenReturn(Mono.just(product));
+        when(userRepository.findByUsername(anyString())).thenReturn(Mono.just(new UserData(1L, "root", "pass")));
 
-        Flux<CartDto> cartDtos = cartService.findAll();
+        Flux<CartDto> cartDtos = cartService.findAll("root");
 
         StepVerifier.create(cartDtos)
                 .expectNextMatches(
@@ -58,62 +64,68 @@ public class CartServiceTest {
                 )
                 .expectComplete()
                 .verify();
+
+        verify(cartRepository).findAllByUserId(1L);
+        verify(productRepository).findById(10L);
     }
 
     @Test
     void removeProduct() {
-        Cart cart = new Cart(20L, 10L, 2);
+        Cart cart = new Cart(20L, 10L, 2, 1L);
 
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.just(cart));
+        when(cartRepository.findCartByProductIdAndUserId(anyLong(), anyLong())).thenReturn(Mono.just(cart));
         when(productRepository.increaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
-        when(cartRepository.deleteByProductId(anyLong())).thenReturn(Mono.empty());
+        when(cartRepository.deleteByProductIdAndUserId(anyLong(), anyLong())).thenReturn(Mono.empty());
+        when(userRepository.findByUsername(anyString())).thenReturn(Mono.just(new UserData(1L, "root", "pass")));
 
-        Mono<Void> result = cartService.removeProduct(10L);
+        Mono<Void> result = cartService.removeProduct(10L, "root");
 
         StepVerifier.create(result)
                 .verifyComplete();
 
-        verify(cartRepository).findCartByProductId(10L);
+        verify(cartRepository).findCartByProductIdAndUserId(10L, 1L);
         verify(productRepository).increaseById(10L, 2);
-        verify(cartRepository).deleteByProductId(10L);
+        verify(cartRepository).deleteByProductIdAndUserId(10L, 1L);
     }
 
     @Test
     void clearCart() {
-        Cart cart = new Cart(20L, 10L, 2);
+        Cart cart = new Cart(20L, 10L, 2, 1L);
 
-        when(cartRepository.findAll()).thenReturn(Flux.just(cart));
+        when(cartRepository.findAllByUserId(anyLong())).thenReturn(Flux.just(cart));
         when(productRepository.increaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
         when(cartRepository.deleteAll()).thenReturn(Mono.empty());
+        when(userRepository.findByUsername(anyString())).thenReturn(Mono.just(new UserData(1L, "root", "pass")));
 
-        Mono<Void> result = cartService.clearCart();
+        Mono<Void> result = cartService.clearCart("root");
 
         StepVerifier.create(result)
                 .verifyComplete();
 
-        verify(cartRepository).findAll();
+        verify(cartRepository).findAllByUserId(1L);
         verify(productRepository).increaseById(10L, 2);
     }
 
     @Test
     void addToCartExistsProduct() {
         Product product = new Product(10L, "product", "desc", 12.34, "url", 15, 0);
-        Cart cart = new Cart(20L, 10L, 2);
+        Cart cart = new Cart(20L, 10L, 2, 1L);
 
         when(productRepository.findById(anyLong())).thenReturn(Mono.just(product));
         when(productRepository.decreaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.just(cart));
+        when(cartRepository.findCartByProductIdAndUserId(anyLong(), anyLong())).thenReturn(Mono.just(cart));
+        when(userRepository.findByUsername(anyString())).thenReturn(Mono.just(new UserData(1L, "root", "pass")));
 
         when(cartRepository.save(any())).thenReturn(Mono.just(cart));
 
-        Mono<Void> result = cartService.addToCart(10L);
+        Mono<Void> result = cartService.addToCart(10L, "root");
 
         StepVerifier.create(result)
                 .verifyComplete();
 
         verify(productRepository).findById(10L);
         verify(productRepository).decreaseById(10L, 1);
-        verify(cartRepository).findCartByProductId(10L);
+        verify(cartRepository).findCartByProductIdAndUserId(10L, 1L);
 
         cart.setQuantity(cart.getQuantity() + 1);
         verify(cartRepository).save(cart);
@@ -125,18 +137,19 @@ public class CartServiceTest {
 
         when(productRepository.findById(anyLong())).thenReturn(Mono.just(product));
         when(productRepository.decreaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.empty());
+        when(cartRepository.findCartByProductIdAndUserId(anyLong(), anyLong())).thenReturn(Mono.empty());
+        when(userRepository.findByUsername(anyString())).thenReturn(Mono.just(new UserData(1L, "root", "pass")));
 
         when(cartRepository.save(any())).thenReturn(Mono.just(new Cart()));
 
-        Mono<Void> result = cartService.addToCart(10L);
+        Mono<Void> result = cartService.addToCart(10L, "root");
 
         StepVerifier.create(result)
                 .verifyComplete();
 
         verify(productRepository).findById(10L);
         verify(productRepository).decreaseById(10L, 1);
-        verify(cartRepository).findCartByProductId(10L);
+        verify(cartRepository).findCartByProductIdAndUserId(10L, 1L);
 
         verify(cartRepository).save(any(Cart.class));
     }
@@ -144,40 +157,42 @@ public class CartServiceTest {
     @Test
     void addToCartOutOfStock() {
         Product product = new Product(10L, "product", "desc", 12.34, "url", 0, 0);
-        Cart cart = new Cart(20L, 10L, 2);
+        Cart cart = new Cart(20L, 10L, 2, 1L);
 
         when(productRepository.findById(anyLong())).thenReturn(Mono.just(product));
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.just(cart));
+        when(cartRepository.findCartByProductIdAndUserId(anyLong(), anyLong())).thenReturn(Mono.just(cart));
+        when(userRepository.findByUsername(anyString())).thenReturn(Mono.just(new UserData(1L, "root", "pass")));
 
         when(cartRepository.save(any())).thenReturn(Mono.just(cart));
 
-        Mono<Void> result = cartService.addToCart(10L);
+        Mono<Void> result = cartService.addToCart(10L, "root");
 
         StepVerifier.create(result)
                 .verifyComplete();
 
         verify(productRepository).findById(10L);
         verify(productRepository, never()).decreaseById(anyLong(), anyInt());
-        verify(cartRepository, never()).findCartByProductId(anyLong());
+        verify(cartRepository, never()).findCartByProductIdAndUserId(anyLong(), anyLong());
 
         verify(cartRepository, never()).save(any());
     }
 
     @Test
     void removeFromCart() {
-        Cart cart = new Cart(20L, 10L, 2);
+        Cart cart = new Cart(20L, 10L, 2, 1L);
 
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.just(cart));
+        when(cartRepository.findCartByProductIdAndUserId(anyLong(), anyLong())).thenReturn(Mono.just(cart));
         when(productRepository.increaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
+        when(userRepository.findByUsername(anyString())).thenReturn(Mono.just(new UserData(1L, "root", "pass")));
 
         when(cartRepository.save(any())).thenReturn(Mono.just(cart));
 
-        Mono<Void> result = cartService.removeFromCart(10L);
+        Mono<Void> result = cartService.removeFromCart(10L, "root");
 
         StepVerifier.create(result)
                 .verifyComplete();
 
-        verify(cartRepository).findCartByProductId(10L);
+        verify(cartRepository).findCartByProductIdAndUserId(10L, 1L);
 
         cart.setQuantity(cart.getQuantity() - 1);
         verify(cartRepository).save(cart);
@@ -186,20 +201,21 @@ public class CartServiceTest {
 
     @Test
     void removeFromCartLastProduct() {
-        Cart cart = new Cart(20L, 10L, 1);
+        Cart cart = new Cart(20L, 10L, 1, 1L);
 
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.just(cart));
+        when(cartRepository.findCartByProductIdAndUserId(anyLong(), anyLong())).thenReturn(Mono.just(cart));
         when(productRepository.increaseById(anyLong(), anyInt())).thenReturn(Mono.just(1L));
+        when(userRepository.findByUsername(anyString())).thenReturn(Mono.just(new UserData(1L, "root", "pass")));
 
         when(cartRepository.save(any())).thenReturn(Mono.just(cart));
         when(cartRepository.delete(any())).thenReturn(Mono.empty());
 
-        Mono<Void> result = cartService.removeFromCart(10L);
+        Mono<Void> result = cartService.removeFromCart(10L, "root");
 
         StepVerifier.create(result)
                 .verifyComplete();
 
-        verify(cartRepository).findCartByProductId(10L);
+        verify(cartRepository).findCartByProductIdAndUserId(10L, 1L);
 
         verify(cartRepository).delete(cart);
         verify(cartRepository, never()).save(any());
@@ -208,16 +224,17 @@ public class CartServiceTest {
 
     @Test
     void removeFromCartNonExistsProduct() {
-        when(cartRepository.findCartByProductId(anyLong())).thenReturn(Mono.empty());
+        when(cartRepository.findCartByProductIdAndUserId(anyLong(), anyLong())).thenReturn(Mono.empty());
+        when(userRepository.findByUsername(anyString())).thenReturn(Mono.just(new UserData(1L, "root", "pass")));
 
         when(cartRepository.save(any())).thenReturn(Mono.just(new Cart()));
 
-        Mono<Void> result = cartService.removeFromCart(10L);
+        Mono<Void> result = cartService.removeFromCart(10L, "root");
 
         StepVerifier.create(result)
                 .verifyComplete();
 
-        verify(cartRepository).findCartByProductId(10L);
+        verify(cartRepository).findCartByProductIdAndUserId(10L, 1L);
 
         verify(cartRepository, never()).save(any());
         verify(productRepository, never()).increaseById(anyLong(), anyInt());

@@ -5,8 +5,10 @@ import com.store.dto.ProductDto;
 import com.store.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
@@ -18,9 +20,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 import static org.springframework.web.reactive.function.BodyInserters.fromFormData;
 
 @WebFluxTest(ProductController.class)
+@AutoConfigureWebTestClient
 public class ProductControllerTest {
 
     @Autowired
@@ -30,6 +34,7 @@ public class ProductControllerTest {
     private ProductService productService;
 
     @Test
+    @WithMockUser(username = "root")
     void getAllProducts() {
         PageResponse expected = new PageResponse(List.of(
                 new ProductDto(100L, "product1", "desc", 10.56, "url", 8, 0),
@@ -49,6 +54,7 @@ public class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void getProductById() {
         ProductDto expected = new ProductDto(100L, "product1", "desc", 10.56, "url", 8, 0);
 
@@ -64,6 +70,7 @@ public class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void saveProduct() {
         when(productService.save(any())).thenReturn(Mono.empty());
 
@@ -75,7 +82,8 @@ public class ProductControllerTest {
         formData.add("stock", "10");
         formData.add("cartQuantity", "0");
 
-        webTestClient.post()
+        webTestClient.mutateWith(csrf())
+                .post()
                 .uri("/products")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(fromFormData(formData))

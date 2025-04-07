@@ -24,7 +24,7 @@ public class OrderMapperTest {
         ProductDto productDto = new ProductDto(20L, "product", "desc", 10.12, "url", 3, 0);
         OrderItemDto orderItemDto = new OrderItemDto(10L, productDto, 2, 12.34);
 
-        Order order = new Order(10L, 12.34, "Paid");
+        Order order = new Order(10L, 12.34, "Paid", 1L);
 
         OrderDto orderDto = orderMapper.toOrderDto(order, List.of(orderItemDto));
 
@@ -40,7 +40,7 @@ public class OrderMapperTest {
     public void toOrder() {
         ProductDto productDto = new ProductDto(20L, "product", "desc", 10.12, "url", 3, 0);
         OrderItemDto orderItemDto = new OrderItemDto(10L, productDto, 2, 12.34);
-        OrderDto orderDto = new OrderDto(10L, 12.34, "Paid", List.of(orderItemDto));
+        OrderDto orderDto = new OrderDto(10L, 12.34, "Paid", 1L, List.of(orderItemDto));
 
         Order order = orderMapper.toOrder(orderDto);
 

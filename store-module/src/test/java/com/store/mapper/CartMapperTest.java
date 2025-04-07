@@ -21,7 +21,8 @@ public class CartMapperTest {
         Cart cart = new Cart(
                 10L,
                 20L,
-                2
+                2,
+                1L
         );
         CartDto cartDto = cartMapper.toCartDto(cart, productDto);
 
@@ -41,7 +42,8 @@ public class CartMapperTest {
         CartDto cartDto = new CartDto(
                 10L,
                 new ProductDto(20L, "product", "desc", 10.12, "url", 3, 0),
-                2);
+                2,
+                1L);
 
         Cart cart = cartMapper.toCart(cartDto);
 

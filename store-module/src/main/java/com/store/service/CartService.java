@@ -79,7 +79,7 @@ public class CartService {
     private Mono<Void> removeProductByUserId(Long productId, Long userId) {
         return cartRepository.findCartByProductIdAndUserId(productId, userId)
                 .map(cart -> productRepository.increaseById(productId, cart.getQuantity()).subscribe())
-                .then(cartRepository.deleteByProductId(productId))
+                .then(cartRepository.deleteByProductIdAndUserId(productId, userId))
                 .then(evictAllProductsCache())
                 .then();
     }
