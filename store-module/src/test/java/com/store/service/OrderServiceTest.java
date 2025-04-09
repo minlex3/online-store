@@ -5,9 +5,11 @@ import com.store.dto.OrderDto;
 import com.store.entity.Order;
 import com.store.entity.OrderItem;
 import com.store.entity.Product;
+import com.store.entity.UserData;
 import com.store.repository.OrderItemRepository;
 import com.store.repository.OrderRepository;
 import com.store.repository.ProductRepository;
+import com.store.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +27,9 @@ import static org.mockito.Mockito.when;
 public class OrderServiceTest {
 
     @MockitoBean
+    private UserRepository userRepository;
+
+    @MockitoBean
     private OrderRepository orderRepository;
 
     @MockitoBean
@@ -38,15 +43,16 @@ public class OrderServiceTest {
 
     @Test
     void findAllOrders() {
-        Order order = new Order(10L, 12.34, "Paid");
+        Order order = new Order(10L, 12.34, "Paid", 1L);
         OrderItem orderItem = new OrderItem(20L, 30L, 10L, 5, 50.5);
         Product product = new Product(30L, "name", "desc", 10.1, "url", 10, 0);
 
-        when(orderRepository.findAll()).thenReturn(Flux.just(order));
+        when(orderRepository.findAllByUserId(anyLong())).thenReturn(Flux.just(order));
         when(orderItemRepository.findAllByOrderId(any())).thenReturn(Flux.just(orderItem));
         when(productRepository.findById(anyLong())).thenReturn(Mono.just(product));
+        when(userRepository.findByUsername(any())).thenReturn(Mono.just(new UserData(1L, "root", "pass")));
 
-        Flux<OrderDto> result = orderService.findAll();
+        Flux<OrderDto> result = orderService.findAll("root");
 
         StepVerifier.create(result)
                 .expectNextMatches(
@@ -59,14 +65,14 @@ public class OrderServiceTest {
                 .expectComplete()
                 .verify();
 
-        verify(orderRepository).findAll();
+        verify(orderRepository).findAllByUserId(1L);
         verify(orderItemRepository).findAllByOrderId(10L);
         verify(productRepository).findById(30L);
     }
 
     @Test
     void findOrderById() {
-        Order order = new Order(10L, 12.34, "Paid");
+        Order order = new Order(10L, 12.34, "Paid", 1L);
         OrderItem orderItem = new OrderItem(20L, 30L, 10L, 5, 50.5);
         Product product = new Product(30L, "name", "desc", 10.1, "url", 10, 0);
 

@@ -6,7 +6,7 @@
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <!-- Создание таблицы products -->
-    <changeSet id="3" author="minlex">
+    <changeSet id="103" author="minlex">
         <createTable tableName="products">
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -29,7 +29,7 @@
     </changeSet>
 
     <!-- Создание таблицы cart -->
-    <changeSet id="4" author="minlex">
+    <changeSet id="104" author="minlex">
         <createTable tableName="cart">
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -40,6 +40,9 @@
             <column name="quantity" type="INT">
                 <constraints nullable="false"/>
             </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
         <rollback>
             <dropTable tableName="cart"/>
@@ -47,7 +50,7 @@
     </changeSet>
 
     <!-- Создание таблицы orders -->
-    <changeSet id="5" author="minlex">
+    <changeSet id="105" author="minlex">
         <createTable tableName="orders">
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -58,6 +61,9 @@
             <column name="status" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
         <rollback>
             <dropTable tableName="orders"/>
@@ -65,7 +71,7 @@
     </changeSet>
 
     <!-- Создание таблицы order_items -->
-    <changeSet id="6" author="minlex">
+    <changeSet id="106" author="minlex">
         <createTable tableName="order_items">
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -85,6 +91,24 @@
         </createTable>
         <rollback>
             <dropTable tableName="order_items"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Создание таблицы users -->
+    <changeSet id="107" author="minlex">
+        <createTable tableName="users">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="users"/>
         </rollback>
     </changeSet>
 </databaseChangeLog>

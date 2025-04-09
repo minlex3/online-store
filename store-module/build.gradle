@@ -20,7 +20,9 @@ repositories {
 
 dependencies {
     implementation project(':payment-module')
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'io.lettuce:lettuce-core'
@@ -34,6 +36,7 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'com.github.codemonstur:embedded-redis:1.4.3'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

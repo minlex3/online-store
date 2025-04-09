@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -14,6 +15,7 @@ public class OrderControllerIntegrationTest {
     private WebTestClient webTestClient;
 
     @Test
+    @WithMockUser(username = "root")
     void getAllOrders() {
         webTestClient.get()
                 .uri("/orders")
@@ -25,6 +27,7 @@ public class OrderControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "root")
     void getOrderById() {
         webTestClient.get()
                 .uri("/orders/1")

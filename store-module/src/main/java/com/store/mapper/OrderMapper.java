@@ -15,6 +15,7 @@ public class OrderMapper {
                 order.getId(),
                 order.getTotalAmount(),
                 order.getStatus(),
+                order.getUserId(),
                 orderItemDtoList
         );
     }
@@ -24,6 +25,7 @@ public class OrderMapper {
         order.setId(orderDto.id());
         order.setTotalAmount(orderDto.totalAmount());
         order.setStatus(orderDto.status());
+        order.setUserId(orderDto.userId());
         return order;
     }
 }

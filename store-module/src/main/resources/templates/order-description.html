@@ -58,6 +58,21 @@
         .button:hover {
             background-color: #3e8e41;
         }
+        .button-delete {
+            background-color: #C63510;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .button-delete:hover {
+            background-color: #8F300B;
+        }
 
         .header-container {
           display: flex;
@@ -68,7 +83,9 @@
           display: flex;
           gap: 10px;
         }
-        .right-form {
+        .right-forms {
+          display: flex;
+          gap: 10px;
           align-self: flex-end;
         }
         .cart-container {
@@ -90,6 +107,9 @@
         </form>
     </div>
     <div class="right-forms">
+        <form th:action="@{/logout}">
+            <button class="button-delete" type="submit">Выход</button>
+        </form>
         <form th:action="@{/cart}">
             <button class="button" type="submit">Корзина</button>
         </form>

@@ -12,7 +12,8 @@ public class CartMapper {
         return new CartDto(
                 cart.getId(),
                 productDto,
-                cart.getQuantity()
+                cart.getQuantity(),
+                cart.getUserId()
         );
     }
 
@@ -21,6 +22,7 @@ public class CartMapper {
         cart.setId(cartDto.id());
         cart.setProductId(cartDto.product().id());
         cart.setQuantity(cartDto.quantity());
+        cart.setUserId(cartDto.userId());
         return cart;
     }
 }

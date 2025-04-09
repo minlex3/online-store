@@ -5,8 +5,24 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
+    <!-- Добавление тестовых пользователей -->
+    <changeSet id="300" author="minlex">
+        <insert tableName="users">
+            <column name="username" value="root"/>
+            <column name="password" value="$2a$10$B/sJqgpRe6FWIjVWmuUXFumQHy8vOj/7ysOByFgHUiNtdS4VkeJl6"/>
+        </insert>
+        <insert tableName="users">
+            <column name="username" value="test"/>
+            <column name="password" value="$2a$10$B/sJqgpRe6FWIjVWmuUXFumQHy8vOj/7ysOByFgHUiNtdS4VkeJl6"/>
+        </insert>
+        <insert tableName="users">
+            <column name="username" value="user"/>
+            <column name="password" value="$2a$10$B/sJqgpRe6FWIjVWmuUXFumQHy8vOj/7ysOByFgHUiNtdS4VkeJl6"/>
+        </insert>
+    </changeSet>
+
     <!-- Добавление тестовых товаров -->
-    <changeSet id="14" author="minlex">
+    <changeSet id="314" author="minlex">
         <insert tableName="products">
             <column name="name" value="Молоток-гвоздодер GROSS"/>
             <column name="description" value="Цельнокованый молоток-гвоздодер Gross 10470 с рабочей головкой весом 570 г и трехкомпонентной рукояткой предназначен для забивания гвоздей и извлечения застрявшего крепежа. Гвозди удобно подцеплять и выпрямлять при помощи изогнутого плоского носка с клиновидной прорезью."/>
@@ -45,31 +61,45 @@
     </changeSet>
 
     <!-- Добавление тестовых данных в корзину -->
-    <changeSet id="15" author="minlex">
+    <changeSet id="315" author="minlex">
         <insert tableName="cart">
             <column name="product_id" value="1"/>
             <column name="quantity" value="2"/>
+            <column name="user_id" value="1"/>
         </insert>
         <insert tableName="cart">
             <column name="product_id" value="2"/>
             <column name="quantity" value="1"/>
+            <column name="user_id" value="1"/>
+        </insert>
+        <insert tableName="cart">
+            <column name="product_id" value="3"/>
+            <column name="quantity" value="1"/>
+            <column name="user_id" value="2"/>
         </insert>
     </changeSet>
 
     <!-- Добавление тестовых заказов -->
-    <changeSet id="16" author="minlex">
+    <changeSet id="316" author="minlex">
         <insert tableName="orders">
             <column name="total_amount" value="1399.98"/>
             <column name="status" value="Упаковка"/>
+            <column name="user_id" value="1"/>
         </insert>
         <insert tableName="orders">
             <column name="total_amount" value="19.99"/>
             <column name="status" value="Доставлен"/>
+            <column name="user_id" value="1"/>
+        </insert>
+        <insert tableName="orders">
+            <column name="total_amount" value="2400.98"/>
+            <column name="status" value="Доставлен"/>
+            <column name="user_id" value="2"/>
         </insert>
     </changeSet>
 
     <!-- Добавление тестовых элементов заказа -->
-    <changeSet id="17" author="minlex">
+    <changeSet id="317" author="minlex">
         <insert tableName="order_items">
             <column name="order_id" value="1"/>
             <column name="product_id" value="1"/>
@@ -81,6 +111,18 @@
             <column name="product_id" value="2"/>
             <column name="quantity" value="1"/>
             <column name="price" value="19.99"/>
+        </insert>
+        <insert tableName="order_items">
+            <column name="order_id" value="3"/>
+            <column name="product_id" value="3"/>
+            <column name="quantity" value="1"/>
+            <column name="price" value="899.99"/>
+        </insert>
+        <insert tableName="order_items">
+            <column name="order_id" value="3"/>
+            <column name="product_id" value="4"/>
+            <column name="quantity" value="1"/>
+            <column name="price" value="1500.99"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

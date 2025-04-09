@@ -60,7 +60,6 @@
             border: none;
             color: white;
             padding: 15px 32px;
-            margin: 10px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
@@ -81,7 +80,9 @@
           display: flex;
           gap: 10px;
         }
-        .right-form {
+        .right-forms {
+          display: flex;
+          gap: 10px;
           align-self: flex-end;
         }
         .cart-container {
@@ -101,12 +102,18 @@
         <form th:action="@{/products}">
             <button class="button" type="submit">На главную</button>
         </form>
-        <form th:action="@{/orders}">
+        <form th:action="@{/orders}" th:if="${isAuthenticated}">
             <button class="button" type="submit">Список заказов</button>
         </form>
     </div>
     <div class="right-forms">
-        <form th:action="@{/cart}">
+        <form th:action="@{/login}" th:unless="${isAuthenticated}">
+            <button class="button" type="submit">Вход</button>
+        </form>
+        <form th:action="@{/logout}" th:if="${isAuthenticated}">
+            <button class="button-delete" type="submit">Выход</button>
+        </form>
+        <form th:action="@{/cart}" th:if="${isAuthenticated}">
             <button class="button" type="submit">Корзина</button>
         </form>
     </div>
@@ -120,7 +127,7 @@
     <p th:text="'Стоимость: ' + ${product.price}"></p>
     <p th:text="'В наличии: ' + ${product.stock}"></p>
 
-    <div class="cart-container">
+    <div class="cart-container" th:if="${isAuthenticated}">
         <form th:action="@{/cart/remove/{id}/product(id=${product.id})}" method="post">
             <button class="button" type="submit">-</button>
         </form>

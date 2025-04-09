@@ -6,6 +6,7 @@ public record OrderDto(
         Long id,
         Double totalAmount,
         String status,
+        Long userId,
         List<OrderItemDto> orderItems
 ) {
 }
