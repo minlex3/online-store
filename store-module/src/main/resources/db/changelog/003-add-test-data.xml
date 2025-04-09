@@ -15,6 +15,10 @@
             <column name="username" value="test"/>
             <column name="password" value="$2a$10$B/sJqgpRe6FWIjVWmuUXFumQHy8vOj/7ysOByFgHUiNtdS4VkeJl6"/>
         </insert>
+        <insert tableName="users">
+            <column name="username" value="user"/>
+            <column name="password" value="$2a$10$B/sJqgpRe6FWIjVWmuUXFumQHy8vOj/7ysOByFgHUiNtdS4VkeJl6"/>
+        </insert>
     </changeSet>
 
     <!-- Добавление тестовых товаров -->

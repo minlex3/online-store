@@ -1,10 +1,12 @@
 # Web-приложение "Витрина интернет-магазина"
 ### ONLINE-STORE
 ## Требования
+
 #### Для запуска Jar:
 - JDK 21
 - Gradle 8
 - Docker
+
 ## Развертывание приложения
 ### Описание
 Сервис состоит из нескольких модулей: 
@@ -12,21 +14,31 @@
 2. RESTful приложение платежного шлюза (payment-module). Отвечает за хранение и модификацию баланса пользователя, а также
 за проведение транзакций оплаты. Протокол взаимодействия между сервисами находится в ресурсах этого приложения.
 3. Redis для кеширования товаров и страниц основного приложения.
+4. Аутентификация по логину/паролю (существует 3 пользователя: root/root, test/root, user/root)
+
 ### Тестирование
 Для запуска тестов можно воспользоваться командой `./gradlew clean test`.
+
 ### Локальный запуск приложения
 Для сборки прокта в ExecutableJar со встроенным сервлет контейнером Tomcat необходимо:
 - Выполнить команду `./gradlew bootJar` для двух проектов. \
 - Запустить докер, выполнить команду для запуска redis локально `docker run --name redis-server -d -p 6379:6379 redis:7.4.2-bookworm`
+- Зпустить локально keycloak `docker run -d -p 8180:8080 --name keycloak -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.1.3 start-dev`
+- Создать в keycloak клиент online-store, выставить для него настройки (client authentication, standart flow, direct access grants,
+implict flow, service accounts roles)
 - Затем запустить payment-module и store-module.
 - После запуска приложение будет доступно по ссылке: `http://localhost:8080/products`.
+
 ### Docker compose
 Для запуска через docker compose необходимо:
 - Запустить docker
 - Выполнить build проекта
-- Затем в корне основного приложения выполнить команду `docker compose up` \
+- Затем в корне основного приложения выполнить команду `docker compose up -d keycloak` \
+- Открыть `http://localhost:8180` (admin/admin) настроить клиента (см. выше)
+- Запустить все сервисы `docker compose up -d`
 После проделанных действий по адресу `http://localhost:8080/products` будет доступно основное приложение, по адресу `http://localhost:8081/api`
 будет доступен платежный шлюз, а по `http://localhost:6379` - redis. 
+- По окончанию работы выполнить команду `docker compose down`
 
 ## Функционал
 - Веб-приложение представляет собой витрину товаров, которые пользователь может положить в корзину и купить.

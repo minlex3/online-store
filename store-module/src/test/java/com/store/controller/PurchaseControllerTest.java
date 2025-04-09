@@ -10,6 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
@@ -27,7 +28,7 @@ public class PurchaseControllerTest {
     @Test
     @WithMockUser(username = "root")
     void makeAllowedPurchase() {
-        when(purchaseService.makePurchase()).thenReturn(Mono.just(10L));
+        when(purchaseService.makePurchase(anyString())).thenReturn(Mono.just(10L));
 
         webTestClient.mutateWith(csrf())
                 .post()
@@ -36,13 +37,13 @@ public class PurchaseControllerTest {
                 .expectHeader().location("/orders/10")
                 .expectStatus().is3xxRedirection();
 
-        verify(purchaseService).makePurchase();
+        verify(purchaseService).makePurchase("root");
     }
 
     @Test
     @WithMockUser(username = "root")
     void makeNotAllowedPurchase() {
-        when(purchaseService.makePurchase()).thenReturn(Mono.error(new RuntimeException("exception")));
+        when(purchaseService.makePurchase(anyString())).thenReturn(Mono.error(new RuntimeException("exception")));
 
         webTestClient.mutateWith(csrf())
                 .post()
@@ -51,6 +52,6 @@ public class PurchaseControllerTest {
                 .expectHeader().location("/cart")
                 .expectStatus().is3xxRedirection();
 
-        verify(purchaseService).makePurchase();
+        verify(purchaseService).makePurchase("root");
     }
 }

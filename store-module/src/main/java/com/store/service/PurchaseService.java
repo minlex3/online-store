@@ -4,11 +4,9 @@ import com.store.entity.Order;
 import com.store.entity.OrderItem;
 import com.store.mapper.CartMapper;
 import com.store.mapper.ProductMapper;
-import com.store.repository.CartRepository;
-import com.store.repository.OrderItemRepository;
-import com.store.repository.OrderRepository;
-import com.store.repository.ProductRepository;
+import com.store.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -18,6 +16,9 @@ import java.util.List;
 
 @Service
 public class PurchaseService {
+
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     CartRepository cartRepository;
@@ -41,8 +42,15 @@ public class PurchaseService {
     private PaymentService paymentService;
 
     @Transactional
-    public Mono<Long> makePurchase() {
-        return cartRepository.findAll()
+    public Mono<Long> makePurchase(String userName) {
+        return userRepository.findByUsername(userName)
+                .switchIfEmpty(Mono.error(new UsernameNotFoundException("User not found")))
+                .flatMap(user -> makePurchaseByUserId(user.getId()));
+    }
+
+    @Transactional
+    private Mono<Long> makePurchaseByUserId(Long userId) {
+        return cartRepository.findAllByUserId(userId)
                 .collectList()
                 .flatMap(cartItems -> {
                     if (cartItems.isEmpty()) {
@@ -62,11 +70,11 @@ public class PurchaseService {
                                 return paymentService.makePurchase(total)
                                         .flatMap(result -> {
                                             Order order = new Order();
+                                            order.setUserId(userId);
                                             order.setTotalAmount(total);
                                             order.setStatus("Оплачен");
 
                                             return orderRepository.save(order)
-                                                    .doOnNext(System.out::println)
                                                     .flatMap(savedOrder -> {
                                                         List<OrderItem> orderItems = cartDtos.stream()
                                                                 .map(cartDto -> {

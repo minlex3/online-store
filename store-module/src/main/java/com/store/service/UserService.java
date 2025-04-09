@@ -26,9 +26,4 @@ public class UserService implements ReactiveUserDetailsService {
                         .password(user.getPassword())
                         .build());
     }
-
-    public Mono<UserData> registerUser(UserData user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
-    }
 }
