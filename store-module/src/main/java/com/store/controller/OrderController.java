@@ -4,7 +4,6 @@ import com.store.dto.OrderDto;
 import com.store.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/orders")
@@ -21,8 +22,8 @@ public class OrderController {
     private OrderService orderService;
 
     @GetMapping
-    public Mono<Rendering> findAll(@AuthenticationPrincipal UserDetails user) {
-        Flux<OrderDto> orderDtoList = orderService.findAll(user.getUsername());
+    public Mono<Rendering> findAll(@AuthenticationPrincipal Principal auth) {
+        Flux<OrderDto> orderDtoList = orderService.findAll(auth.getName());
         Rendering r = Rendering.view("orders-list")
                 .modelAttribute("orders", orderDtoList)
                 .build();

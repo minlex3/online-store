@@ -28,7 +28,6 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(
                                 "/login",
-                                "/register",
                                 "/products",
                                 "/products/*",
                                 "/static/**"
